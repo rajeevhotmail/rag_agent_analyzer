@@ -90,6 +90,7 @@ def parse_arguments():
     parser.add_argument("--skip-rag",  action="store_true",    help="Skip RAG generation and reuse existing report_data.json")
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     parser.add_argument("--output", default="report.pdf")
+
     args = parser.parse_args()
 
     if not args.url and not args.local_path and not (args.skip_fetch and args.skip_process):

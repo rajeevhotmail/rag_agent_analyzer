@@ -1,4 +1,5 @@
 from openai import OpenAI
+import re
 
 class NarrativeStitcher:
     def __init__(self, model="gpt-4o"):
@@ -35,16 +36,26 @@ class NarrativeStitcher:
 
 # Inside narrative_stitcher.py, after the class
 
-def extract_narrative_and_key_findings(full_text: str):
-    split_marker = "Key Findings"
-    if split_marker in full_text:
-        narrative, key_section = full_text.split(split_marker, 1)
-        key_points = key_section.strip().split('\n')
-        key_findings = [
-            line.lstrip("•").lstrip("-").strip()
-            for line in key_points
-            if line.strip()
-        ]
-        return narrative.strip(), key_findings
-    else:
-        return full_text.strip(), []
+def extract_narrative_and_key_findings(text):
+    """
+    Parses the LLM's markdown-style response into narrative and key findings.
+    Returns:
+        narrative (str): stitched narrative portion
+        findings (list of str): bullet points from key findings
+    """
+    # Use a case-insensitive regex to find the start of the Key Findings section
+    key_findings_match = re.search(r'(?i)^#+\s*Key Findings\s*$', text, re.MULTILINE)
+
+    if not key_findings_match:
+        # If no key findings section found, treat everything as narrative
+        return text.strip(), []
+
+    split_index = key_findings_match.start()
+
+    narrative = text[:split_index].strip()
+    findings_section = text[split_index:].strip()
+
+    # Extract bullet points from the findings section
+    findings = re.findall(r"[-*+]\s+(.*)", findings_section)
+
+    return narrative, findings
