@@ -70,7 +70,12 @@ class NarrativeAgent:
             f"6. Avoid exaggerating or introducing features such as AI, ML, blockchain, or predictive analytics "
             f"unless they were explicitly mentioned in the answers."
         )
-
+        if role.lower() in ["ceo", "sales", "sales_manager", "marketing"]:
+            prompt += (
+                "\n7. Begin the report with a clearly marked section titled **Executive Summary**. "
+                "Write 3–5 sentences summarizing the project's strategic importance, key strengths, and overall purpose. "
+                "After this section, continue the full narrative without repeating the summary."
+            )
         client = OpenAI()
         response = client.chat.completions.create(
             model="gpt-4o",

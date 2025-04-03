@@ -23,27 +23,47 @@ class WeasyPDFWriter:
         return output_path
 
     def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str]) -> str:
+        from section_headers import ROLE_SECTION_HEADERS
+        import re
         from datetime import datetime
 
+        # Split executive summary
+        summary_html = ""
+        body_html_parts = []
+
         lines = text.split('\n')
-        paragraphs = []
         in_code_block = False
         code_buffer = []
+        is_summary = False
+        collecting_summary = False
 
         for line in lines:
             if line.strip().startswith("```"):
-                if in_code_block:
-                    paragraphs.append('<pre><code class="language-python">' + "\n".join(code_buffer) + '</code></pre>')
+                in_code_block = not in_code_block
+                if not in_code_block:
+                    body_html_parts.append("<pre><code>" + "\n".join(code_buffer) + "</code></pre>")
                     code_buffer = []
-                    in_code_block = False
-                else:
-                    in_code_block = True
-            elif in_code_block:
-                code_buffer.append(line)
-            elif line.strip():
-                clean_line = line.strip().lstrip("-").lstrip("•").strip()
-                paragraphs.append(f"<p>{clean_line}</p>")
+                continue
 
+            if in_code_block:
+                code_buffer.append(line)
+                continue
+
+            if "**Executive Summary**" in line:
+                collecting_summary = True
+                continue
+
+            if collecting_summary:
+                if not line.strip():
+                    collecting_summary = False  # empty line = end of summary
+                    continue
+                summary_html += f"<p>{line.strip()}</p>"
+            else:
+                if line.strip():
+                    body_html_parts.append(f"<p>{line.strip()}</p>")
+
+        section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
+        chunk_size = max(1, len(body_html_parts) // len(section_headers))
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         html = f"""
@@ -58,7 +78,19 @@ class WeasyPDFWriter:
             <p><em>Generated on: {timestamp}</em></p>
         """
 
-        # ⬇️ Optional: Key Findings at top (only if provided)
+        # ✅ Executive Summary
+        if summary_html:
+            html += "<h2>Executive Summary</h2>"
+            html += summary_html
+
+        # ✅ Table of Contents
+        html += "<h2>Table of Contents</h2><ul>"
+        for i, header in enumerate(section_headers):
+            section_id = f"section{i+1}"
+            html += f'<li><a href="#{section_id}">{header}</a></li>'
+        html += "</ul>"
+
+        # ✅ Key Findings
         if key_findings:
             html += "<h2>Key Findings</h2><ul>"
             for point in key_findings:
@@ -66,26 +98,16 @@ class WeasyPDFWriter:
                     html += f"<li>{point.strip()}</li>"
             html += "</ul>"
 
-        # ⬇️ Now dump all content
-        for para in paragraphs:
-            html += para
-
-        html += "</body></html>"
-        return html
-
-
-        # ✅ Main content
+        # ✅ Main Narrative
         for i, header in enumerate(section_headers):
             section_id = f"section{i+1}"
             html += f'<h2 id="{section_id}">{header}</h2>'
-            for para in paragraphs[i * chunk_size: (i + 1) * chunk_size]:
-                if para.startswith("<pre>"):
-                    html += para
-                else:
-                    html += para
+            for para in body_html_parts[i * chunk_size: (i + 1) * chunk_size]:
+                html += para
 
         html += "</body></html>"
         return html
+
 
 
 
