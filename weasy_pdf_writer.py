@@ -23,7 +23,7 @@ class WeasyPDFWriter:
         return output_path
 
     def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str]) -> str:
-        from section_headers import ROLE_SECTION_HEADERS
+        from datetime import datetime
 
         lines = text.split('\n')
         paragraphs = []
@@ -33,7 +33,7 @@ class WeasyPDFWriter:
         for line in lines:
             if line.strip().startswith("```"):
                 if in_code_block:
-                    paragraphs.append("<pre><code class=\"language-python\">" + "\n".join(code_buffer) + "</code></pre>")
+                    paragraphs.append('<pre><code class="language-python">' + "\n".join(code_buffer) + '</code></pre>')
                     code_buffer = []
                     in_code_block = False
                 else:
@@ -41,13 +41,11 @@ class WeasyPDFWriter:
             elif in_code_block:
                 code_buffer.append(line)
             elif line.strip():
-                paragraphs.append(f"<p>{line.strip()}</p>")
+                clean_line = line.strip().lstrip("-").lstrip("•").strip()
+                paragraphs.append(f"<p>{clean_line}</p>")
 
-        section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
-        chunk_size = max(1, len(paragraphs) // len(section_headers))
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # ✅ Start HTML layout
         html = f"""
         <html>
         <head>
@@ -60,7 +58,7 @@ class WeasyPDFWriter:
             <p><em>Generated on: {timestamp}</em></p>
         """
 
-        # ✅ Insert Key Findings FIRST
+        # ⬇️ Optional: Key Findings at top (only if provided)
         if key_findings:
             html += "<h2>Key Findings</h2><ul>"
             for point in key_findings:
@@ -68,12 +66,13 @@ class WeasyPDFWriter:
                     html += f"<li>{point.strip()}</li>"
             html += "</ul>"
 
-        # ✅ Table of Contents
-        html += "<h2>Table of Contents</h2><ul>"
-        for i, header in enumerate(section_headers):
-            section_id = f"section{i+1}"
-            html += f'<li><a href="#{section_id}">{header}</a></li>'
-        html += "</ul>"
+        # ⬇️ Now dump all content
+        for para in paragraphs:
+            html += para
+
+        html += "</body></html>"
+        return html
+
 
         # ✅ Main content
         for i, header in enumerate(section_headers):
@@ -132,14 +131,11 @@ class WeasyPDFWriter:
                 font-size: 10pt;
                 font-family: monospace;
             }
-            code.language-python {
-                color: #2a2a2a;
+            code {
+                white-space: pre-wrap;
+                font-family: monospace;
+                color: #000000;
             }
-            code.language-python .keyword { color: #007020; font-weight: bold; }
-            code.language-python .name { color: #06287e; }
-            code.language-python .string { color: #4070a0; }
-            code.language-python .comment { color: #60a0b0; font-style: italic; }
-            code.language-python .number { color: #40a070; }
         """)
 
 

@@ -35,6 +35,28 @@ if not logger.handlers:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
+with open("retrieved_chunks_all.txt", "w", encoding="utf-8") as f:
+    f.write("📄 Retrieved Chunks Log\n")
+    f.write("=" * 40 + "\n\n")
+def test_chunk_print(question: str, retriever, top_k: int = 5, output_file: str = "retrieved_chunks.txt"):
+    """
+    Utility function to write top-k retrieved chunks to a file for inspection.
+    Overwrites the output file each time.
+    """
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(f"🔍 Testing chunk retrieval for question: \"{question}\"\n\n")
+
+        results = retriever.retrieve_relevant_chunks(question, top_k=top_k)
+
+        for i, chunk in enumerate(results):
+            file = chunk.get('file', 'unknown')
+            content = chunk.get('content', '')[:800]  # limit to 800 chars
+            f.write(f"\n📦 Chunk {i+1} - File: {file}\n")
+            f.write("-" * 60 + "\n")
+            f.write(content + "\n")
+            f.write("-" * 60 + "\n\n")
+
+    print(f"✅ Retrieved chunks written to: {output_file}")
 
 class RAGEngine:
     """
@@ -81,16 +103,8 @@ class RAGEngine:
         ]
     }
 
-    def __init__(
-        self,
-        embeddings_dir: str,
-        repo_info: Dict[str, Any],
-        use_openai: bool = False,
-        use_local_llm: bool = False,
-        local_llm_path: Optional[str] = None,
-        local_llm_type: str = "llama2",
-        log_level: int = logging.INFO
-    ):
+    def __init__(self, embeddings_dir, repo_info, use_openai, use_local_llm,
+                 local_llm_path, local_llm_type, log_level, qa_model="gpt-3.5-turbo"):
         """
         Initialize the RAG engine.
 
@@ -109,6 +123,7 @@ class RAGEngine:
         self.use_local_llm = use_local_llm
         self.local_llm_path = local_llm_path
         self.local_llm_type = local_llm_type
+        self.qa_model = qa_model
 
         # Load embeddings manager
         self.embedding_manager = EmbeddingsManager(
@@ -642,17 +657,29 @@ class RAGEngine:
                 """
 
             # Default guidelines for all question types
-            system_prompt += """
-            
-            General guidelines:
-            - Base your answer ONLY on the provided context
-            - If the context doesn't contain enough information, say so clearly
-            - Cite specific file names when relevant
-            - Organize your answer in a clear, structured format
-            - Be specific and comprehensive
-            - Focus on factual information from the repository
-            """
 
+            system_prompt += """
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            """
+            role = self.repo_info.get("role", "").lower()
+            if role in ["ceo", "sales", "sales manager", "marketing"]:
+                system_prompt += """
+                Additional role-specific instruction:
+                Since this report is intended for a CEO or business-facing role, do not include any code snippets or overly technical implementation details.
+                Focus instead on architecture, design strategy, business value, maintainability, scalability, and product impact.
+                Present findings in conceptual, strategic terms.
+                """
+            else:
+                system_prompt += """
+                If relevant, include short code snippets (3–8 lines) in markdown-style Python blocks (```python).
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+                """
             # Count tokens in the system prompt
             system_tokens = len(encoding.encode(system_prompt))
             question_tokens = len(encoding.encode(question))
@@ -803,9 +830,22 @@ class RAGEngine:
 
             # Call OpenAI API
             start_time = time.time()
+            with open("retrieved_chunks_all.txt", "a", encoding="utf-8") as f:
+                f.write(f"\n\n====== Retrieved Chunks for Question: \"{question}\" ======\n\n")
+                for i, result in enumerate(chunks):
+                    inner = result.get("chunk", {})
+                    file = inner.get("file_path", "unknown")
+                    content = inner.get("content", "<empty>")
+                    f.write(f"\n📦 Chunk {i+1} - File: {file}\n")
+                    f.write("-" * 60 + "\n")
+                    f.write(content[:800] + "\n")
+                    f.write("-" * 60 + "\n")
 
+            with open("diagnose_chunk_format.json", "w", encoding="utf-8") as f:
+                json.dump(chunks[0], f, indent=2)
             response = self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",  # Using a smaller model to reduce token costs
+                #model="gpt-3.5-turbo",  # Using a smaller model to reduce token costs
+                 model=self.qa_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}
@@ -868,7 +908,6 @@ class RAGEngine:
             start_time = time.time()
 
             self.logger.info(f"Generating answer with local LLM for question: {question[:50]}...")
-
             answer = self.local_llm.generate_answer(
                 question=question,
                 context=context_text,

@@ -1,0 +1,1283 @@
+📄 Retrieved Chunks Log
+========================================
+
+
+
+====== Retrieved Chunks for Question: "What programming languages are used in this project?" ======
+
+
+📦 Chunk 1 - File: repository_info/languages
+------------------------------------------------------------
+This repository contains multiple programming languages. The primary languages used are: Python (18750%), Markdown (317%), YAML (198%), Batch (36%), JSON (17%)
+------------------------------------------------------------
+
+📦 Chunk 2 - File: docs/index.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, ['--count=3'], prog_name='python hello.py', input='John\n')
+
+It automatically generates nicely formatted help pages:
+
+.. click:run::
+
+    invoke(hello, ['--help'], prog_name='python hello.py')
+
+You can get the library directly from PyPI::
+
+    pip install click
+
+Documentation
+-------------
+
+This part of the documentation guides you through all of the library's
+usage patterns.
+
+.. toctree::
+   :maxdepth: 2
+
+   why
+   quickstart
+   entry-points
+   virtualenv
+   setuptools
+   parameters
+   parameter-types
+   options
+   option-decorators
+   arguments
+   commands-and-groups
+   commands
+   documentation
+   prompts
+   complex
+   advanced
+   testing
+   utils
+   shell-completion
+   exceptions
+   unicode-support
+   wincmd
+
+API Reference
+-------------
+
+If you are lo
+------------------------------------------------------------
+
+📦 Chunk 3 - File: src/click/core.py
+------------------------------------------------------------
+    def meta(self) -> dict[str, t.Any]:
+        """This is a dictionary which is shared with all the contexts
+        that are nested.  It exists so that click utilities can store some
+        state here if they need to.  It is however the responsibility of
+        that code to manage this dictionary well.
+
+        The keys are supposed to be unique dotted strings.  For instance
+        module paths are a good choice for it.  What is stored in there is
+        irrelevant for the operation of click.  However what is important is
+        that code that places data here adheres to the general semantics of
+        the system.
+
+        Example usage::
+
+            LANG_KEY = f'{__name__}.lang'
+
+            def set_language(value):
+                ctx = get_current_context()
+                ctx.
+------------------------------------------------------------
+
+📦 Chunk 4 - File: docs/quickstart.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, args=['--help'], prog_name='python hello.py')
+
+Echoing
+-------
+
+Why does this example use :func:`echo` instead of the regular
+:func:`print` function?  The answer to this question is that Click
+attempts to support different environments consistently and to be very
+robust even when the environment is misconfigured.  Click wants to be
+functional at least on a basic level even if everything is completely
+broken.
+
+What this means is that the :func:`echo` function applies some error
+correction in case the terminal is misconfigured instead of dying with a
+:exc:`UnicodeError`.
+
+The echo function also supports color and other styles in output. It
+will automatically remove styles if the output stream is a file. On
+Windows, colorama is automatically installed and us
+------------------------------------------------------------
+
+📦 Chunk 5 - File: docs/quickstart.rst
+------------------------------------------------------------
+*   `repo <https://github.com/pallets/click/tree/main/examples/repo>`_ : An advanced example that implements a Git-/Mercurial-like command line interface.
+*   `complex <https://github.com/pallets/click/tree/main/examples/complex>`_ : A very advanced example that implements loading subcommands dynamically from a plugin folder.
+*   `termui <https://github.com/pallets/click/tree/main/examples/termui>`_ : A simple example that showcases terminal UI helpers provided by click.
+
+Basic Concepts - Creating a Command
+-----------------------------------
+
+Click is based on declaring commands through decorators.  Internally, there
+is a non-decorator interface for advanced use cases, but it's discouraged
+for high-level usage.
+
+A function becomes a Click command line tool by decorating it through
+:func:`
+------------------------------------------------------------
+
+📦 Chunk 6 - File: docs/why.rst
+------------------------------------------------------------
+    parsing.
+
+Why not Docopt etc.?
+--------------------
+
+Docopt, and many tools like it, are cool in how they work, but very few of
+these tools deal with nesting of commands and composability in a way like
+Click.  To the best of the developer's knowledge, Click is the first
+Python library that aims to create a level of composability of applications
+that goes beyond what the system itself supports.
+
+Docopt, for instance, acts by parsing your help pages and then parsing
+according to those rules.  The side effect of this is that docopt is quite
+rigid in how it handles the command line interface.  The upside of docopt
+is that it gives you strong control over your help page; the downside is
+that due to this it cannot rewrap your output for the current terminal
+width, and it makes translations h
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What is the project's architecture/structure?" ======
+
+
+📦 Chunk 1 - File: repository_info/structure
+------------------------------------------------------------
+The repository pallets_click likely follows a structured layout with source code, documentation, and configuration files.
+------------------------------------------------------------
+
+📦 Chunk 2 - File: docs/index.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, ['--count=3'], prog_name='python hello.py', input='John\n')
+
+It automatically generates nicely formatted help pages:
+
+.. click:run::
+
+    invoke(hello, ['--help'], prog_name='python hello.py')
+
+You can get the library directly from PyPI::
+
+    pip install click
+
+Documentation
+-------------
+
+This part of the documentation guides you through all of the library's
+usage patterns.
+
+.. toctree::
+   :maxdepth: 2
+
+   why
+   quickstart
+   entry-points
+   virtualenv
+   setuptools
+   parameters
+   parameter-types
+   options
+   option-decorators
+   arguments
+   commands-and-groups
+   commands
+   documentation
+   prompts
+   complex
+   advanced
+   testing
+   utils
+   shell-completion
+   exceptions
+   unicode-support
+   wincmd
+
+API Reference
+-------------
+
+If you are lo
+------------------------------------------------------------
+
+📦 Chunk 3 - File: docs/quickstart.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, args=['--help'], prog_name='python hello.py')
+
+Echoing
+-------
+
+Why does this example use :func:`echo` instead of the regular
+:func:`print` function?  The answer to this question is that Click
+attempts to support different environments consistently and to be very
+robust even when the environment is misconfigured.  Click wants to be
+functional at least on a basic level even if everything is completely
+broken.
+
+What this means is that the :func:`echo` function applies some error
+correction in case the terminal is misconfigured instead of dying with a
+:exc:`UnicodeError`.
+
+The echo function also supports color and other styles in output. It
+will automatically remove styles if the output stream is a file. On
+Windows, colorama is automatically installed and us
+------------------------------------------------------------
+
+📦 Chunk 4 - File: docs/why.rst
+------------------------------------------------------------
+    parsing.
+
+Why not Docopt etc.?
+--------------------
+
+Docopt, and many tools like it, are cool in how they work, but very few of
+these tools deal with nesting of commands and composability in a way like
+Click.  To the best of the developer's knowledge, Click is the first
+Python library that aims to create a level of composability of applications
+that goes beyond what the system itself supports.
+
+Docopt, for instance, acts by parsing your help pages and then parsing
+according to those rules.  The side effect of this is that docopt is quite
+rigid in how it handles the command line interface.  The upside of docopt
+is that it gives you strong control over your help page; the downside is
+that due to this it cannot rewrap your output for the current terminal
+width, and it makes translations h
+------------------------------------------------------------
+
+📦 Chunk 5 - File: docs/quickstart.rst
+------------------------------------------------------------
+*   `repo <https://github.com/pallets/click/tree/main/examples/repo>`_ : An advanced example that implements a Git-/Mercurial-like command line interface.
+*   `complex <https://github.com/pallets/click/tree/main/examples/complex>`_ : A very advanced example that implements loading subcommands dynamically from a plugin folder.
+*   `termui <https://github.com/pallets/click/tree/main/examples/termui>`_ : A simple example that showcases terminal UI helpers provided by click.
+
+Basic Concepts - Creating a Command
+-----------------------------------
+
+Click is based on declaring commands through decorators.  Internally, there
+is a non-decorator interface for advanced use cases, but it's discouraged
+for high-level usage.
+
+A function becomes a Click command line tool by decorating it through
+:func:`
+------------------------------------------------------------
+
+📦 Chunk 6 - File: README.md
+------------------------------------------------------------
+## Donate
+
+The Pallets organization develops and supports Click and other popular
+packages. In order to grow the community of contributors and users, and
+allow the maintainers to devote more time to the projects, [please
+donate today][].
+
+[please donate today]: https://palletsprojects.com/donate
+
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What are the main components/modules of the project?" ======
+
+
+📦 Chunk 1 - File: docs/index.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, ['--count=3'], prog_name='python hello.py', input='John\n')
+
+It automatically generates nicely formatted help pages:
+
+.. click:run::
+
+    invoke(hello, ['--help'], prog_name='python hello.py')
+
+You can get the library directly from PyPI::
+
+    pip install click
+
+Documentation
+-------------
+
+This part of the documentation guides you through all of the library's
+usage patterns.
+
+.. toctree::
+   :maxdepth: 2
+
+   why
+   quickstart
+   entry-points
+   virtualenv
+   setuptools
+   parameters
+   parameter-types
+   options
+   option-decorators
+   arguments
+   commands-and-groups
+   commands
+   documentation
+   prompts
+   complex
+   advanced
+   testing
+   utils
+   shell-completion
+   exceptions
+   unicode-support
+   wincmd
+
+API Reference
+-------------
+
+If you are lo
+------------------------------------------------------------
+
+📦 Chunk 2 - File: docs/quickstart.rst
+------------------------------------------------------------
+*   `repo <https://github.com/pallets/click/tree/main/examples/repo>`_ : An advanced example that implements a Git-/Mercurial-like command line interface.
+*   `complex <https://github.com/pallets/click/tree/main/examples/complex>`_ : A very advanced example that implements loading subcommands dynamically from a plugin folder.
+*   `termui <https://github.com/pallets/click/tree/main/examples/termui>`_ : A simple example that showcases terminal UI helpers provided by click.
+
+Basic Concepts - Creating a Command
+-----------------------------------
+
+Click is based on declaring commands through decorators.  Internally, there
+is a non-decorator interface for advanced use cases, but it's discouraged
+for high-level usage.
+
+A function becomes a Click command line tool by decorating it through
+:func:`
+------------------------------------------------------------
+
+📦 Chunk 3 - File: README.md
+------------------------------------------------------------
+## Donate
+
+The Pallets organization develops and supports Click and other popular
+packages. In order to grow the community of contributors and users, and
+allow the maintainers to devote more time to the projects, [please
+donate today][].
+
+[please donate today]: https://palletsprojects.com/donate
+
+------------------------------------------------------------
+
+📦 Chunk 4 - File: docs/quickstart.rst
+------------------------------------------------------------
+Quickstart
+==========
+
+.. currentmodule:: click
+
+Install
+----------------------
+Install from PyPI::
+
+    pip install click
+
+Installing into a virtual environment is highly recommended. We suggest :ref:`virtualenv-heading`.
+
+Examples
+-----------------------
+
+Some standalone examples of Click applications are packaged with Click. They are available in the `examples folder <https://github.com/pallets/click/tree/main/examples>`_ of the repo.
+
+*   `inout <https://github.com/pallets/click/tree/main/examples/inout>`_ : A very simple example of an application that can read from files and write to files and also accept input from stdin or write to stdout.
+*   `validation <https://github.com/pallets/click/tree/main/examples/validation>`_ : A simple example of an application that performs custom vali
+------------------------------------------------------------
+
+📦 Chunk 5 - File: docs/quickstart.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, args=['--help'], prog_name='python hello.py')
+
+Echoing
+-------
+
+Why does this example use :func:`echo` instead of the regular
+:func:`print` function?  The answer to this question is that Click
+attempts to support different environments consistently and to be very
+robust even when the environment is misconfigured.  Click wants to be
+functional at least on a basic level even if everything is completely
+broken.
+
+What this means is that the :func:`echo` function applies some error
+correction in case the terminal is misconfigured instead of dying with a
+:exc:`UnicodeError`.
+
+The echo function also supports color and other styles in output. It
+will automatically remove styles if the output stream is a file. On
+Windows, colorama is automatically installed and us
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What testing framework(s) are used?" ======
+
+
+📦 Chunk 1 - File: tests/test_testing.py
+------------------------------------------------------------
+def test_catch_exceptions():
+    class CustomError(Exception):
+        pass
+
+    @click.command()
+    def cli():
+        raise CustomError(1)
+
+    runner = CliRunner()
+
+    result = runner.invoke(cli)
+    assert isinstance(result.exception, CustomError)
+    assert type(result.exc_info) is tuple
+    assert len(result.exc_info) == 3
+
+    with pytest.raises(CustomError):
+        runner.invoke(cli, catch_exceptions=False)
+
+    CustomError = SystemExit
+
+    result = runner.invoke(cli)
+    assert result.exit_code == 1
+------------------------------------------------------------
+
+📦 Chunk 2 - File: tests/test_types.py
+------------------------------------------------------------
+def test_range_fail(type, value, expect):
+    with pytest.raises(click.BadParameter) as exc_info:
+        type.convert(value, None, None)
+
+    assert expect in exc_info.value.message
+------------------------------------------------------------
+
+📦 Chunk 3 - File: tests/test_options.py
+------------------------------------------------------------
+def test_invalid_option(runner):
+    with pytest.raises(TypeError, match="name was passed") as exc_info:
+        click.Option(["foo"])
+
+    message = str(exc_info.value)
+    assert "name was passed (foo)" in message
+    assert "declare an argument" in message
+    assert "'--foo'" in message
+------------------------------------------------------------
+
+📦 Chunk 4 - File: tests/test_options.py
+------------------------------------------------------------
+def test_invalid_nargs(runner):
+    with pytest.raises(TypeError, match="nargs=-1"):
+
+        @click.command()
+        @click.option("--foo", nargs=-1)
+        def cli(foo):
+            pass
+------------------------------------------------------------
+
+📦 Chunk 5 - File: tests/test_types.py
+------------------------------------------------------------
+def test_file_surrogates(type, tmp_path):
+    path = tmp_path / "\udcff"
+
+    with pytest.raises(click.BadParameter, match="�': No such file or directory"):
+        type.convert(path, None, None)
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What dependencies does this project have?" ======
+
+
+📦 Chunk 1 - File: docs/quickstart.rst
+------------------------------------------------------------
+*   `repo <https://github.com/pallets/click/tree/main/examples/repo>`_ : An advanced example that implements a Git-/Mercurial-like command line interface.
+*   `complex <https://github.com/pallets/click/tree/main/examples/complex>`_ : A very advanced example that implements loading subcommands dynamically from a plugin folder.
+*   `termui <https://github.com/pallets/click/tree/main/examples/termui>`_ : A simple example that showcases terminal UI helpers provided by click.
+
+Basic Concepts - Creating a Command
+-----------------------------------
+
+Click is based on declaring commands through decorators.  Internally, there
+is a non-decorator interface for advanced use cases, but it's discouraged
+for high-level usage.
+
+A function becomes a Click command line tool by decorating it through
+:func:`
+------------------------------------------------------------
+
+📦 Chunk 2 - File: pyproject.toml
+------------------------------------------------------------
+[project]
+name = "click"
+version = "8.2.0.dev"
+description = "Composable command line interface toolkit"
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+maintainers = [{name = "Pallets", email = "contact@palletsprojects.com"}]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Typing :: Typed",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "colorama; platform_system == 'Windows'",
+]
+
+[project.urls]
+Donate = "https://palletsprojects.com/donate"
+Documentation = "https://click.palletsprojects.com/"
+Changes = "https://click.palletsprojects.com/changes/"
+Source = "https://github.com/pallets/click/"
+Chat
+------------------------------------------------------------
+
+📦 Chunk 3 - File: docs/why.rst
+------------------------------------------------------------
+Why Click?
+==========
+
+There are so many libraries out there for writing command line utilities;
+why does Click exist?
+
+This question is easy to answer: because there is not a single command
+line utility for Python out there which ticks the following boxes:
+
+*   Is lazily composable without restrictions.
+*   Supports implementation of Unix/POSIX command line conventions.
+*   Supports loading values from environment variables out of the box.
+*   Support for prompting of custom values.
+*   Is fully nestable and composable.
+*   Supports file handling out of the box.
+*   Comes with useful common helpers (getting terminal dimensions,
+    ANSI colors, fetching direct keyboard input, screen clearing,
+    finding config paths, launching apps and editors, etc.).
+
+There are many alternatives to Clic
+------------------------------------------------------------
+
+📦 Chunk 4 - File: examples/completion/pyproject.toml
+------------------------------------------------------------
+[project]
+name = "click-example-completion"
+version = "1.0.0"
+description = "Click completion example"
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.1",
+]
+
+[project.scripts]
+completion = "completion:cli"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "completion"
+
+------------------------------------------------------------
+
+📦 Chunk 5 - File: examples/repo/pyproject.toml
+------------------------------------------------------------
+[project]
+name = "click-example-repo"
+version = "1.0.0"
+description = "Click repo example"
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.1",
+]
+
+[project.scripts]
+repo = "repo:cli"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "repo"
+
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What is the code quality like (comments, documentation, etc.)?" ======
+
+
+📦 Chunk 1 - File: docs/index.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, ['--count=3'], prog_name='python hello.py', input='John\n')
+
+It automatically generates nicely formatted help pages:
+
+.. click:run::
+
+    invoke(hello, ['--help'], prog_name='python hello.py')
+
+You can get the library directly from PyPI::
+
+    pip install click
+
+Documentation
+-------------
+
+This part of the documentation guides you through all of the library's
+usage patterns.
+
+.. toctree::
+   :maxdepth: 2
+
+   why
+   quickstart
+   entry-points
+   virtualenv
+   setuptools
+   parameters
+   parameter-types
+   options
+   option-decorators
+   arguments
+   commands-and-groups
+   commands
+   documentation
+   prompts
+   complex
+   advanced
+   testing
+   utils
+   shell-completion
+   exceptions
+   unicode-support
+   wincmd
+
+API Reference
+-------------
+
+If you are lo
+------------------------------------------------------------
+
+📦 Chunk 2 - File: docs/quickstart.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, args=['--help'], prog_name='python hello.py')
+
+Echoing
+-------
+
+Why does this example use :func:`echo` instead of the regular
+:func:`print` function?  The answer to this question is that Click
+attempts to support different environments consistently and to be very
+robust even when the environment is misconfigured.  Click wants to be
+functional at least on a basic level even if everything is completely
+broken.
+
+What this means is that the :func:`echo` function applies some error
+correction in case the terminal is misconfigured instead of dying with a
+:exc:`UnicodeError`.
+
+The echo function also supports color and other styles in output. It
+will automatically remove styles if the output stream is a file. On
+Windows, colorama is automatically installed and us
+------------------------------------------------------------
+
+📦 Chunk 3 - File: docs/why.rst
+------------------------------------------------------------
+is to build the most beautiful and hand-crafted command line interfaces.
+These two goals conflict with one another in subtle ways.  Click
+actively prevents people from implementing certain patterns in order to
+achieve unified command line interfaces.  For instance, as a developer, you
+are given very little choice in formatting your help pages.
+
+
+Why Hardcoded Behaviors?
+------------------------
+
+The other question is why Click goes away from optparse and hardcodes
+certain behaviors instead of staying configurable.  There are multiple
+reasons for this.  The biggest one is that too much configurability makes
+it hard to achieve a consistent command line experience.
+
+The best example for this is optparse's ``callback`` functionality for
+accepting an arbitrary number of arguments.  Due to synta
+------------------------------------------------------------
+
+📦 Chunk 4 - File: docs/why.rst
+------------------------------------------------------------
+available or it does not enforce subcommands to work in a consistent way.
+
+This is fine, but it's different from how Click wants to work.  Click aims
+to support fully composable command line user interfaces by doing the
+following:
+
+-   Click does not just parse, it also dispatches to the appropriate code.
+-   Click has a strong concept of an invocation context that allows
+    subcommands to respond to data from the parent command.
+-   Click has strong information available for all parameters and commands,
+    so it can generate unified help pages for the full CLI and
+    assist the user in converting the input data as necessary.
+-   Click has a strong understanding of what types are, and it can give the user
+    consistent error messages if something goes wrong.  A subcommand
+    written b
+------------------------------------------------------------
+
+📦 Chunk 5 - File: CONTRIBUTING.rst
+------------------------------------------------------------
+    the repository.
+
+.. _minimal reproducible example: https://stackoverflow.com/help/minimal-reproducible-example
+
+
+Submitting patches
+------------------
+
+If there is not an open issue for what you want to submit, prefer
+opening one for discussion before working on a PR. You can work on any
+issue that doesn't have an open PR linked to it or a maintainer assigned
+to it. These show up in the sidebar. No need to ask if you can work on
+an issue that interests you.
+
+Include the following in your patch:
+
+-   Use `Black`_ to format your code. This and other tools will run
+    automatically if you install `pre-commit`_ using the instructions
+    below.
+-   Include tests if your patch adds or changes code. Make sure the test
+    fails without your patch.
+-   Update any relevant docs pages and docs
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "Are there any known bugs or issues?" ======
+
+
+📦 Chunk 1 - File: CONTRIBUTING.rst
+------------------------------------------------------------
+How to contribute to Click
+==========================
+
+Thank you for considering contributing to Click!
+
+
+Support questions
+-----------------
+
+Please don't use the issue tracker for this. The issue tracker is a tool
+to address bugs and feature requests in Click itself. Use one of the
+following resources for questions about using Click or issues with your
+own code:
+
+-   The ``#get-help`` channel on our Discord chat:
+    https://discord.gg/pallets
+-   The mailing list flask@python.org for long term discussion or larger
+    issues.
+-   Ask on `Stack Overflow`_. Search with Google first using:
+    ``site:stackoverflow.com python click {search term, exception message, etc.}``
+
+.. _Stack Overflow: https://stackoverflow.com/questions/tagged/python-click?tab=Frequent
+
+
+Reporting issues
+-----------
+------------------------------------------------------------
+
+📦 Chunk 2 - File: CHANGES.rst
+------------------------------------------------------------
+    edge cases.
+
+
+Version 2.2
+-----------
+
+Released 2014-06-26
+
+-   Fixed tty detection on PyPy.
+-   Fixed an issue that progress bars were not rendered when the context
+    manager was entered.
+
+
+Version 2.1
+-----------
+
+Released 2014-06-14
+
+-   Fixed the :func:`launch` function on windows.
+-   Improved the colorama support on windows to try hard to not screw up
+    the console if the application is interrupted.
+-   Fixed windows terminals incorrectly being reported to be 80
+    characters wide instead of 79
+-   Use colorama win32 bindings if available to get the correct
+    dimensions of a windows terminal.
+-   Fixed an issue with custom function types on Python 3.
+-   Fixed an issue with unknown options being incorrectly reported in
+    error messages.
+
+
+Version 2.0
+-----------
+
+Release
+------------------------------------------------------------
+
+📦 Chunk 3 - File: CONTRIBUTING.rst
+------------------------------------------------------------
+    the repository.
+
+.. _minimal reproducible example: https://stackoverflow.com/help/minimal-reproducible-example
+
+
+Submitting patches
+------------------
+
+If there is not an open issue for what you want to submit, prefer
+opening one for discussion before working on a PR. You can work on any
+issue that doesn't have an open PR linked to it or a maintainer assigned
+to it. These show up in the sidebar. No need to ask if you can work on
+an issue that interests you.
+
+Include the following in your patch:
+
+-   Use `Black`_ to format your code. This and other tools will run
+    automatically if you install `pre-commit`_ using the instructions
+    below.
+-   Include tests if your patch adds or changes code. Make sure the test
+    fails without your patch.
+-   Update any relevant docs pages and docs
+------------------------------------------------------------
+
+📦 Chunk 4 - File: CHANGES.rst
+------------------------------------------------------------
+-   Operations that strip ANSI controls will strip the cursor hide/show
+    sequences. :issue:`1216`
+-   Remove unused compat shim for ``bytes``. :pr:`1195`
+-   Expand testing around termui, especially getchar on Windows.
+    :issue:`1116`
+-   Fix output on Windows Python 2.7 built with MSVC 14. :pr:`1342`
+-   Fix ``OSError`` when running in MSYS2. :issue:`1338`
+-   Fix ``OSError`` when redirecting to ``NUL`` stream on Windows.
+    :issue:`1065`
+-   Fix memory leak when parsing Unicode arguments on Windows.
+    :issue:`1136`
+-   Fix error in new AppEngine environments. :issue:`1462`
+-   Always return one of the passed choices for ``click.Choice``
+    :issue:`1277`, :pr:`1318`
+-   Add ``no_args_is_help`` option to ``click.Command``, defaults to
+    False :pr:`1167`
+-   Add ``show_default`` 
+------------------------------------------------------------
+
+📦 Chunk 5 - File: CHANGES.rst
+------------------------------------------------------------
+
+-   Fix a bug where error messages would include a trailing ``None``
+    string.
+-   Fix a bug where Click would crash on docstrings with trailing
+    newlines.
+-   Support streams with encoding set to ``None`` on Python 3 by barfing
+    with a better error.
+-   Handle ^C in less-pager properly.
+-   Handle return value of ``None`` from ``sys.getfilesystemencoding``
+-   Fix crash when writing to unicode files with ``click.echo``.
+-   Fix type inference with multiple options.
+
+
+Version 4.0
+-----------
+
+Released 2015-03-31, codename "zoom zoom"
+
+-   Added ``color`` parameters to lots of interfaces that directly or
+    indirectly call into echoing. This previously was always
+    autodetection (with the exception of the ``echo_via_pager``
+    function). Now you can forcefully enable or disable
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What is the build/deployment process?" ======
+
+
+📦 Chunk 1 - File: requirements/build.in
+------------------------------------------------------------
+build
+
+------------------------------------------------------------
+
+📦 Chunk 2 - File: requirements/build.txt
+------------------------------------------------------------
+#
+# This file is autogenerated by pip-compile with Python 3.13
+# by the following command:
+#
+#    pip-compile build.in
+#
+build==1.2.2.post1
+    # via -r build.in
+packaging==24.1
+    # via build
+pyproject-hooks==1.2.0
+    # via build
+------------------------------------------------------------
+
+📦 Chunk 3 - File: CONTRIBUTING.rst
+------------------------------------------------------------
+    the repository.
+
+.. _minimal reproducible example: https://stackoverflow.com/help/minimal-reproducible-example
+
+
+Submitting patches
+------------------
+
+If there is not an open issue for what you want to submit, prefer
+opening one for discussion before working on a PR. You can work on any
+issue that doesn't have an open PR linked to it or a maintainer assigned
+to it. These show up in the sidebar. No need to ask if you can work on
+an issue that interests you.
+
+Include the following in your patch:
+
+-   Use `Black`_ to format your code. This and other tools will run
+    automatically if you install `pre-commit`_ using the instructions
+    below.
+-   Include tests if your patch adds or changes code. Make sure the test
+    fails without your patch.
+-   Update any relevant docs pages and docs
+------------------------------------------------------------
+
+📦 Chunk 4 - File: docs/commands-and-groups.rst
+------------------------------------------------------------
+Basic Commands, Groups, Context
+================================
+
+.. currentmodule:: click
+
+Commands and Groups are the building blocks for Click applications. :class:`Command` wraps a function to make it into a cli command. :class:`Group` wraps Commands and Groups to make them into applications. :class:`Context` is how groups and commands communicate.
+
+.. contents::
+   :depth: 1
+   :local:
+
+Basic Command Example
+----------------------
+A simple command decorator takes no arguments.
+
+.. click:example::
+    @click.command()
+    @click.option('--count', default=1)
+    def hello(count):
+        for x in range(count):
+            click.echo("Hello!")
+
+.. click:run::
+    invoke(hello, args=['--count', '2',])
+
+Renaming Commands
+------------------
+By default the command is the function name with u
+------------------------------------------------------------
+
+📦 Chunk 5 - File: docs/entry-points.rst
+------------------------------------------------------------
+    description = "Hello CLI"
+    requires-python = ">=3.11"
+    dependencies = [
+        "click>=8.1",
+    ]
+
+    [project.scripts]
+    hello = "hello:cli"
+
+    [build-system]
+    requires = ["flit_core<4"]
+    build-backend = "flit_core.buildapi"
+
+The magic is in the ``project.scripts`` section. Each line identifies one executable
+script. The first part before the equals sign (``=``) is the name of the script that
+should be generated, the second part is the import path followed by a colon
+(``:``) with the function to call (the Click command).
+
+
+Installation
+------------
+
+When your package is installed, the installer will create an executable script
+based on the configuration. During development, you can install in editable
+mode using the ``-e`` option. Remember to use a virtual environme
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "How is version control used in the project?" ======
+
+
+📦 Chunk 1 - File: docs/index.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, ['--count=3'], prog_name='python hello.py', input='John\n')
+
+It automatically generates nicely formatted help pages:
+
+.. click:run::
+
+    invoke(hello, ['--help'], prog_name='python hello.py')
+
+You can get the library directly from PyPI::
+
+    pip install click
+
+Documentation
+-------------
+
+This part of the documentation guides you through all of the library's
+usage patterns.
+
+.. toctree::
+   :maxdepth: 2
+
+   why
+   quickstart
+   entry-points
+   virtualenv
+   setuptools
+   parameters
+   parameter-types
+   options
+   option-decorators
+   arguments
+   commands-and-groups
+   commands
+   documentation
+   prompts
+   complex
+   advanced
+   testing
+   utils
+   shell-completion
+   exceptions
+   unicode-support
+   wincmd
+
+API Reference
+-------------
+
+If you are lo
+------------------------------------------------------------
+
+📦 Chunk 2 - File: src/click/core.py
+------------------------------------------------------------
+    def scope(self, cleanup: bool = True) -> cabc.Iterator[Context]:
+        """This helper method can be used with the context object to promote
+        it to the current thread local (see :func:`get_current_context`).
+        The default behavior of this is to invoke the cleanup functions which
+        can be disabled by setting `cleanup` to `False`.  The cleanup
+        functions are typically used for things such as closing file handles.
+
+        If the cleanup is intended the context object can also be directly
+        used as a context manager.
+
+        Example usage::
+
+            with ctx.scope():
+                assert get_current_context() is ctx
+
+        This is equivalent::
+
+            with ctx:
+                assert get_current_context() is ctx
+
+        .. versionadded:: 5.0
+------------------------------------------------------------
+
+📦 Chunk 3 - File: examples/repo/repo.py
+------------------------------------------------------------
+def cli(ctx, repo_home, config, verbose):
+    """Repo is a command line tool that showcases how to build complex
+    command line interfaces with Click.
+
+    This tool is supposed to look like a distributed version control
+    system to show how something like this can be structured.
+    """
+    # Create a repo object and remember it as as the context object.  From
+    # this point onwards other commands can refer to it by using the
+    # @pass_repo decorator.
+    ctx.obj = Repo(os.path.abspath(repo_home))
+    ctx.obj.verbose = verbose
+    for key, value in config:
+        ctx.obj.set_config(key, value)
+------------------------------------------------------------
+
+📦 Chunk 4 - File: src/click/decorators.py
+------------------------------------------------------------
+def version_option(
+    version: str | None = None,
+    *param_decls: str,
+    package_name: str | None = None,
+    prog_name: str | None = None,
+    message: str | None = None,
+    **kwargs: t.Any,
+) -> t.Callable[[FC], FC]:
+    """Add a ``--version`` option which immediately prints the version
+    number and exits the program.
+
+    If ``version`` is not provided, Click will try to detect it using
+    :func:`importlib.metadata.version` to get the version for the
+    ``package_name``.
+
+    If ``package_name`` is not provided, Click will try to detect it by
+    inspecting the stack frames. This will be used to detect the
+    version, so it must match the name of the installed package.
+
+    :param version: The version number to show. If not provided, Click
+        will try to detect it.
+    
+------------------------------------------------------------
+
+📦 Chunk 5 - File: docs/quickstart.rst
+------------------------------------------------------------
+
+.. click:run::
+
+    invoke(hello, args=['--help'], prog_name='python hello.py')
+
+Echoing
+-------
+
+Why does this example use :func:`echo` instead of the regular
+:func:`print` function?  The answer to this question is that Click
+attempts to support different environments consistently and to be very
+robust even when the environment is misconfigured.  Click wants to be
+functional at least on a basic level even if everything is completely
+broken.
+
+What this means is that the :func:`echo` function applies some error
+correction in case the terminal is misconfigured instead of dying with a
+:exc:`UnicodeError`.
+
+The echo function also supports color and other styles in output. It
+will automatically remove styles if the output stream is a file. On
+Windows, colorama is automatically installed and us
+------------------------------------------------------------
+
+
+====== Retrieved Chunks for Question: "What coding standards or conventions are followed?" ======
+
+
+📦 Chunk 1 - File: src/click/_compat.py
+------------------------------------------------------------
+def _is_compatible_text_stream(
+    stream: t.TextIO, encoding: str | None, errors: str | None
+) -> bool:
+    """Check if a stream's encoding and errors attributes are
+    compatible with the desired values.
+    """
+    return _is_compat_stream_attr(
+        stream, "encoding", encoding
+    ) and _is_compat_stream_attr(stream, "errors", errors)
+------------------------------------------------------------
+
+📦 Chunk 2 - File: src/click/_compat.py
+------------------------------------------------------------
+def get_best_encoding(stream: t.IO[t.Any]) -> str:
+    """Returns the default stream encoding if not found."""
+    rv = getattr(stream, "encoding", None) or sys.getdefaultencoding()
+    if is_ascii_encoding(rv):
+        return "utf-8"
+    return rv
+------------------------------------------------------------
+
+📦 Chunk 3 - File: CHANGES.rst
+------------------------------------------------------------
+    has a ``return_value`` attribute with the value returned by the
+    invoked command. :pr:`1312`
+-   Required arguments with the ``Choice`` type show the choices in
+    curly braces to indicate that one is required (``{a|b|c}``).
+    :issue:`1272`
+-   If only a name is passed to ``option()``, Click suggests renaming it
+    to ``--name``. :pr:`1355`
+-   A context's ``show_default`` parameter defaults to the value from
+    the parent context. :issue:`1565`
+-   ``click.style()`` can output 256 and RGB color codes. Most modern
+    terminals support these codes. :pr:`1429`
+-   When using ``CliRunner.invoke()``, the replaced ``stdin`` file has
+    ``name`` and ``mode`` attributes. This lets ``File`` options with
+    the ``-`` value match non-testing behavior. :issue:`1064`
+-   When creating a
+------------------------------------------------------------
+
+📦 Chunk 4 - File: CHANGES.rst
+------------------------------------------------------------
+-   Added a bit of extra information about missing choice parameters.
+-   Changed how the help function is implemented to allow global
+    overriding of the help option.
+-   Added support for token normalization to implement case insensitive
+    handling.
+-   Added support for providing defaults for context settings.
+
+
+Version 1.1
+-----------
+
+Released 2014-05-23
+
+-   Fixed a bug that caused text files in Python 2 to not accept native
+    strings.
+
+
+Version 1.0
+-----------
+
+Released 2014-05-21
+
+-   Initial release.
+------------------------------------------------------------
+
+📦 Chunk 5 - File: CHANGES.rst
+------------------------------------------------------------
+    for configs.
+-   Added transparent handling for ANSI codes into the :func:`echo`
+    function through ``colorama``.
+-   Added :func:`clear` function.
+-   Breaking change: parameter callbacks now get the parameter object
+    passed as second argument. There is legacy support for old callbacks
+    which will warn but still execute the script.
+-   Added :func:`style`, :func:`unstyle` and :func:`secho` for ANSI
+    styles.
+-   Added an :func:`edit` function that invokes the default editor.
+-   Added an :func:`launch` function that launches browsers and
+    applications.
+-   Nargs of -1 for arguments can now be forced to be a single item
+    through the required flag. It defaults to not required.
+-   Setting a default for arguments now implicitly makes it non
+    required.
+-   Changed "yN" 
+------------------------------------------------------------

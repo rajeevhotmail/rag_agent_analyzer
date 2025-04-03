@@ -79,6 +79,8 @@ def parse_arguments():
     parser.add_argument("--gitlab-token")
     parser.add_argument("--output-dir", default="./output")
     parser.add_argument("--persistent", action="store_true")
+    parser.add_argument("--qa-model", choices=["gpt-3.5-turbo", "gpt-4o"], default="gpt-3.5-turbo", help="LLM to use for Q&A generation (first pass).")
+    parser.add_argument("--narrative-model", choices=["gpt-3.5-turbo", "gpt-4o"],    default="gpt-4o",    help="LLM to use for narrative stitching (second pass).")
     parser.add_argument("--use-openai", action="store_true")
     parser.add_argument("--existing-json")
     parser.add_argument("--use-local-llm", action="store_true")
@@ -169,10 +171,14 @@ def generate_report_data(args, rag_engine, logger):
         sys.exit(1)
     return rag_engine.generate_report_data(args.role)
 
-def generate_pdf(report_data):
+def generate_pdf(report_data, narrative_model: str):
     agent = NarrativeAgent(role=report_data["role"], repo_name=report_data["repository"]["name"],
-                           qa_pairs=report_data["qa_pairs"], model="gpt-3.5-turbo")
-    narrative, findings = extract_narrative_and_key_findings(agent.build_narrative())
+                           qa_pairs=report_data["qa_pairs"], model=narrative_model)
+
+    narrative, findings = extract_narrative_and_key_findings(agent.build_narrative(report_data))
+    raw_text = agent.build_narrative(report_data)
+    with open("debug_narrative_raw.txt", "w", encoding="utf-8") as f:
+        f.write(raw_text)
     writer = WeasyPDFWriter()
     return writer.write_pdf(narrative, report_data["repository"]["name"], report_data["role"], findings)
 
@@ -231,10 +237,12 @@ def main():
             embeddings_dir=dirs["embeddings"],
             repo_info=repo_info,
             use_openai=args.use_openai,
+            qa_model=args.qa_model,
             use_local_llm=args.use_local_llm,
             local_llm_path=args.local_llm_path,
             local_llm_type=args.local_llm_type,
             log_level=args.log_level
+
         )
 
         # Generate report data and save it
@@ -251,7 +259,7 @@ def main():
             logger.info("💾 Saved new report_data.json")
 
         # Generate PDF report
-        pdf_path = generate_pdf(report_data)
+        pdf_path = generate_pdf(report_data, args.narrative_model)
         print(f"PDF saved to: {pdf_path}")
 
     except Exception as e:
