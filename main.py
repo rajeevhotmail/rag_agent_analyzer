@@ -81,6 +81,7 @@ def parse_arguments():
     parser.add_argument("--persistent", action="store_true")
     parser.add_argument("--qa-model", choices=["gpt-3.5-turbo", "gpt-4o"], default="gpt-3.5-turbo", help="LLM to use for Q&A generation (first pass).")
     parser.add_argument("--narrative-model", choices=["gpt-3.5-turbo", "gpt-4o"],    default="gpt-4o",    help="LLM to use for narrative stitching (second pass).")
+    parser.add_argument("--include-competitive", action="store_true",    help="Include competitive analysis section in the report (optional, adds cost)")
     parser.add_argument("--use-openai", action="store_true")
     parser.add_argument("--existing-json")
     parser.add_argument("--use-local-llm", action="store_true")
@@ -171,16 +172,14 @@ def generate_report_data(args, rag_engine, logger):
         sys.exit(1)
     return rag_engine.generate_report_data(args.role)
 
-def generate_pdf(report_data, narrative_model: str):
-    agent = NarrativeAgent(role=report_data["role"], repo_name=report_data["repository"]["name"],
-                           qa_pairs=report_data["qa_pairs"], model=narrative_model)
-
-    narrative, findings = extract_narrative_and_key_findings(agent.build_narrative(report_data))
-    raw_text = agent.build_narrative(report_data)
-    with open("debug_narrative_raw.txt", "w", encoding="utf-8") as f:
-        f.write(raw_text)
+def generate_pdf(narrative: str, findings: list[str], report_data: dict) -> str:
     writer = WeasyPDFWriter()
-    return writer.write_pdf(narrative, report_data["repository"]["name"], report_data["role"], findings)
+    return writer.write_pdf(
+        narrative,
+        report_data["repository"]["name"],
+        report_data["role"],
+        findings
+    )
 
 def main():
     args = parse_arguments()
@@ -258,8 +257,28 @@ def main():
             save_json(report_data_file, report_data)
             logger.info("💾 Saved new report_data.json")
 
-        # Generate PDF report
-        pdf_path = generate_pdf(report_data, args.narrative_model)
+
+        agent = NarrativeAgent(
+            role=report_data["role"],
+            repo_name=report_data["repository"]["name"],
+            qa_pairs=report_data["qa_pairs"],
+            model=args.narrative_model
+        )
+
+        raw_narrative = agent.build_narrative(report_data)
+        narrative, findings = extract_narrative_and_key_findings(raw_narrative)
+
+        # Optional debug
+        with open("debug_narrative_raw.txt", "w", encoding="utf-8") as f:
+            f.write(raw_narrative)
+        if args.include_competitive and report_data["role"].lower() in ["ceo", "sales", "marketing"]:
+            from competitive_agent import CompetitiveAgent
+            competitor = CompetitiveAgent(report_data["repository"]["name"])
+            competitive_section = competitor.analyze()
+            narrative += "\n\n**Competitive Landscape**\n\n" + competitive_section
+
+        # ✅ Generate PDF report
+        pdf_path = generate_pdf(narrative, findings, report_data)
         print(f"PDF saved to: {pdf_path}")
 
     except Exception as e:
