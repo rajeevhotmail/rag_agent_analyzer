@@ -668,7 +668,7 @@ class RAGEngine:
                 - Focus on factual information from the repository
             """
             role = self.repo_info.get("role", "").lower()
-            if role in ["ceo", "sales", "sales manager", "marketing"]:
+            if role in ["ceo", "sales", "sales_manager", "marketing"]:
                 system_prompt += """
                 Additional role-specific instruction:
                 Since this report is intended for a CEO or business-facing role, do not include any code snippets or overly technical implementation details.

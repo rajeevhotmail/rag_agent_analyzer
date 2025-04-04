@@ -45,7 +45,7 @@ class NarrativeAgent:
             qa_block += f"{i}. Q: {ans['question']}\nA: {ans['answer']}\n\n"
 
         # Role-specific snippet toggle
-        if role.lower() in ["ceo", "sales", "sales manager", "marketing"]:
+        if role.lower() in ["ceo", "sales", "sales_manager", "marketing"]:
             snippet_instruction = (
                 "Do not include any code snippets. Focus on conceptual, strategic, and architectural explanations. "
                 "Avoid technical implementation details and developer-level content."

@@ -8,15 +8,15 @@ class CompetitiveAgent:
 
     def analyze(self) -> str:
         prompt = (
-            f"You are a technical strategist. Based on the open-source Python project called '{self.project_name}', "
-            f"identify one or two competing or similar tools or libraries. For each, compare their:\n"
-            f"- Core features\n"
-            f"- Typical use cases\n"
-            f"- Popularity (GitHub stars, PyPI downloads, etc.)\n"
-            f"- Strengths and limitations\n\n"
-            f"Then summarize whether this project stands out, or how it fits into the ecosystem.\n\n"
-            f"Your response should be suitable for a CEO or business decision-maker."
+            f"You are a technical strategist conducting a competitive analysis for the open-source project '{self.project_name}'.\n\n"
+            f"Identify 1–2 competing or similar open-source tools.\n\n"
+            f"Return only a well-formatted HTML table comparing all tools, including '{self.project_name}', using the following columns:\n"
+            f"Tool, Core Features, Use Case, Performance, Ease of Use, Maintenance, Adoption, License\n\n"
+            f"⚠️ Do not include any explanations, headings, bullet points, or markdown formatting.\n"
+            f"Only return the <table> element with <tr>, <th>, and <td> tags.\n"
+            f"Ensure the table is valid HTML and will render cleanly in a PDF document.\n"
         )
+
 
         response = self.client.chat.completions.create(
             model=self.model,

@@ -126,6 +126,7 @@ def setup_logging(log_level):
     logging.getLogger("fontTools").setLevel(logging.WARNING)
     logging.getLogger("fontTools.subset").setLevel(logging.WARNING)
     logging.getLogger("fontTools.subset.timer").setLevel(logging.WARNING)
+    logging.getLogger("fontTools.ttLib.ttFont").setLevel(logging.WARNING)
     return logging.getLogger("main")
 
 def setup_directories(base_dir, repo_name):
@@ -172,13 +173,14 @@ def generate_report_data(args, rag_engine, logger):
         sys.exit(1)
     return rag_engine.generate_report_data(args.role)
 
-def generate_pdf(narrative: str, findings: list[str], report_data: dict) -> str:
+def generate_pdf(narrative, findings, report_data, competitive_section=None):
     writer = WeasyPDFWriter()
     return writer.write_pdf(
         narrative,
         report_data["repository"]["name"],
         report_data["role"],
-        findings
+        findings,
+        competitive_section=competitive_section
     )
 
 def main():
@@ -271,14 +273,15 @@ def main():
         # Optional debug
         with open("debug_narrative_raw.txt", "w", encoding="utf-8") as f:
             f.write(raw_narrative)
-        if args.include_competitive and report_data["role"].lower() in ["ceo", "sales", "marketing"]:
+        if args.include_competitive and report_data["role"].lower() in ["ceo", "sales_manager", "marketing"]:
             from competitive_agent import CompetitiveAgent
             competitor = CompetitiveAgent(report_data["repository"]["name"])
             competitive_section = competitor.analyze()
-            narrative += "\n\n**Competitive Landscape**\n\n" + competitive_section
 
+        else:
+            competitive_section = None
         # ✅ Generate PDF report
-        pdf_path = generate_pdf(narrative, findings, report_data)
+        pdf_path = generate_pdf(narrative, findings, report_data, competitive_section)
         print(f"PDF saved to: {pdf_path}")
 
     except Exception as e:

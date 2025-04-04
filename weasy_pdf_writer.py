@@ -5,40 +5,53 @@ from section_headers import ROLE_SECTION_HEADERS
 from weasyprint import HTML, CSS
 from datetime import datetime
 
+def _render_table(table_lines: list[str]) -> str:
+    html = "<table border='1' cellspacing='0' cellpadding='5'>"
+    for i, row in enumerate(table_lines):
+        cells = [c.strip() for c in row.split("|")[1:-1]]
+        if i == 0:
+            html += "<tr>" + "".join(f"<th>{c}</th>" for c in cells) + "</tr>"
+        else:
+            html += "<tr>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>"
+    html += "</table><br/>"
+    return html
 class WeasyPDFWriter:
     def __init__(self, output_dir="output_reports"):
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
 
-    def write_pdf(self, text: str, repo_name: str, role: str, key_findings: list[str] = None) -> str:
+    def write_pdf(self, text: str, repo_name: str, role: str, key_findings: list[str] = None, competitive_section: str = None) -> str:
         filename = f"{repo_name}_{role}_report_{int(time.time())}.pdf"
         output_path = os.path.join(self.output_dir, filename)
 
         # Convert content into HTML
-        html_content = self._build_html(text, repo_name, role, key_findings)
+        html_content = self._build_html(text, repo_name, role, key_findings, competitive_section)
+        print("======= HTML Content Length =======")
+        print(len(html_content))
+        print("===================================")
 
         # Write PDF
         HTML(string=html_content).write_pdf(output_path, stylesheets=[self._get_default_css()])
         print(f"✅ PDF saved to: {output_path}")
         return output_path
-
-    def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str]) -> str:
+    def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str], competitive_section: str = None) -> str:
         from section_headers import ROLE_SECTION_HEADERS
         import re
         from datetime import datetime
 
-        # Split executive summary
-        summary_html = ""
-        body_html_parts = []
-
         lines = text.split('\n')
         in_code_block = False
         code_buffer = []
-        is_summary = False
+        summary_html = ""
+        body_html_parts = []
+
         collecting_summary = False
 
+        # Parse narrative text
         for line in lines:
-            if line.strip().startswith("```"):
+            stripped = line.strip()
+
+            if stripped.startswith("```"):
                 in_code_block = not in_code_block
                 if not in_code_block:
                     body_html_parts.append("<pre><code>" + "\n".join(code_buffer) + "</code></pre>")
@@ -49,18 +62,22 @@ class WeasyPDFWriter:
                 code_buffer.append(line)
                 continue
 
-            if "**Executive Summary**" in line:
+            if "**Executive Summary**" in stripped:
                 collecting_summary = True
                 continue
 
             if collecting_summary:
-                if not line.strip():
-                    collecting_summary = False  # empty line = end of summary
+                if not stripped:
+                    collecting_summary = False
                     continue
-                summary_html += f"<p>{line.strip()}</p>"
+                summary_html += f"<p>{stripped}</p>"
             else:
-                if line.strip():
-                    body_html_parts.append(f"<p>{line.strip()}</p>")
+                if stripped.startswith("- "):
+                    body_html_parts.append(f"<p>{stripped}</p>")
+                elif stripped.startswith("**") and stripped.endswith("**"):
+                    body_html_parts.append(f"<p><strong>{stripped.strip('**')}</strong></p>")
+                elif stripped:
+                    body_html_parts.append(f"<p>{stripped}</p>")
 
         section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
         chunk_size = max(1, len(body_html_parts) // len(section_headers))
@@ -78,37 +95,38 @@ class WeasyPDFWriter:
             <p><em>Generated on: {timestamp}</em></p>
         """
 
-        # ✅ Executive Summary
         if summary_html:
-            html += "<h2>Executive Summary</h2>"
-            html += summary_html
+            html += "<h2>Executive Summary</h2>" + summary_html
 
-        # ✅ Table of Contents
+        # TOC
         html += "<h2>Table of Contents</h2><ul>"
         for i, header in enumerate(section_headers):
             section_id = f"section{i+1}"
             html += f'<li><a href="#{section_id}">{header}</a></li>'
+        if competitive_section:
+            html += '<li><a href="#competitive">Competitive Landscape</a></li>'
         html += "</ul>"
 
-        # ✅ Key Findings
+        # Key Findings
         if key_findings:
             html += "<h2>Key Findings</h2><ul>"
-            for point in key_findings:
-                if point.strip():
-                    html += f"<li>{point.strip()}</li>"
+            html += ''.join(f"<li>{point.strip()}</li>" for point in key_findings if point.strip())
             html += "</ul>"
 
-        # ✅ Main Narrative
+        # Narrative Sections
         for i, header in enumerate(section_headers):
             section_id = f"section{i+1}"
             html += f'<h2 id="{section_id}">{header}</h2>'
             for para in body_html_parts[i * chunk_size: (i + 1) * chunk_size]:
                 html += para
 
+        # Competitive Section
+        if competitive_section:
+            html += '<h2 id="competitive">Competitive Landscape</h2>'
+            html += competitive_section  # assumes it's valid HTML (not markdown)
+
         html += "</body></html>"
         return html
-
-
 
 
 
@@ -149,16 +167,27 @@ class WeasyPDFWriter:
                 background: #f5f5f5;
                 border-left: 3px solid #ccc;
                 padding: 10px;
-                overflow-x: auto;
                 font-size: 10pt;
                 font-family: monospace;
-            }
-            code {
                 white-space: pre-wrap;
-                font-family: monospace;
-                color: #000000;
+                word-wrap: break-word;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                table-layout: fixed;
+                word-wrap: break-word;
+            }
+            th, td {
+                border: 1px solid #ccc;
+                padding: 8px;
+                font-size: 10pt;
+                vertical-align: top;
+                word-break: break-word;
             }
         """)
+
+
 
 
 # --- CLI Runner ---
