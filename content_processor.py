@@ -61,7 +61,6 @@ from tree_sitter import Language, Parser
 # Build Tree-sitter language library only once
 TREE_SITTER_JAVA_PATH = os.path.join(os.path.dirname(__file__), 'tree_sitter_languages', 'tree-sitter-java')
 TREE_SITTER_LIB_PATH = os.path.join(os.path.dirname(__file__), 'tree-sitter-java-libs.so')
-
 if not os.path.exists(TREE_SITTER_LIB_PATH):
     Language.build_library(
         TREE_SITTER_LIB_PATH,
@@ -71,6 +70,7 @@ if not os.path.exists(TREE_SITTER_LIB_PATH):
 JAVA_LANGUAGE = Language(TREE_SITTER_LIB_PATH, 'java')
 JAVA_PARSER = Parser()
 JAVA_PARSER.set_language(JAVA_LANGUAGE)
+GO_LANGUAGE = Language(TREE_SITTER_LIB_PATH, "go")
 
 
 class ContentChunk:
@@ -361,6 +361,8 @@ class ContentProcessor:
             chunks = self._process_python_code(file_path, content)
         elif language == LANG_JAVA:
             chunks = self._process_java_code(file_path, content)
+        elif language == LANG_GO:
+            chunks = self._process_go_code(file_path, content)
         else:
             # For other languages, use generic chunking
             self.logger.debug(f"Using generic chunking for {language} file: {file_path}")
@@ -540,6 +542,33 @@ class ContentProcessor:
 
         return local_chunks
 
+    def _process_go_code(self, file_path, content):
+        parser = Parser()
+        parser.set_language(GO_LANGUAGE)
+        tree = parser.parse(bytes(content, "utf8"))
+        root = tree.root_node
+
+        chunks = []
+
+        def extract_chunks(node):
+            if node.type in ["function_declaration", "method_declaration", "type_declaration", "struct_type"]:
+                code = content[node.start_byte:node.end_byte]
+                name_node = node.child_by_field_name("name")
+                name = name_node.text.decode() if name_node else "unnamed"
+                chunks.append({
+                    "file_path": file_path,
+                    "language": "go",
+                    "name": name,
+                    "type": node.type,
+                    "start_line": node.start_point[0] + 1,
+                    "end_line": node.end_point[0] + 1,
+                    "content": code.strip()
+                })
+            for child in node.children:
+                extract_chunks(child)
+
+        extract_chunks(root)
+        return chunks
     def _process_java_code(self, file_path: str, content: str) -> List[ContentChunk]:
         """
         Process Java file using Tree-sitter to extract classes and methods.
