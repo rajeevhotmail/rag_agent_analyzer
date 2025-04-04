@@ -677,7 +677,7 @@ class RAGEngine:
                 """
             else:
                 system_prompt += """
-                If relevant, include short code snippets (3–8 lines) in markdown-style Python blocks (```python).
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
                 Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
                 """
             # Count tokens in the system prompt
@@ -858,7 +858,12 @@ class RAGEngine:
 
             # Extract answer from response
             answer = response.choices[0].message.content
-
+            answer_text = response.choices[0].message.content.strip()
+            # ✅ Log both the question and generated answer
+            with open("debug_phase1_answers.txt", "a", encoding="utf-8") as f:
+                f.write(f"Q: {question}\n")
+                f.write(f"A: {answer_text}\n")
+                f.write("=" * 80 + "\n")
             # Log token usage
             usage = response.usage
             self.logger.info(

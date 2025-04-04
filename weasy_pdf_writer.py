@@ -34,20 +34,18 @@ class WeasyPDFWriter:
         HTML(string=html_content).write_pdf(output_path, stylesheets=[self._get_default_css()])
         print(f"✅ PDF saved to: {output_path}")
         return output_path
-    def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str], competitive_section: str = None) -> str:
+    def _build_html(self, text: str, repo_name: str, role: str, key_findings: list[str] = None, competitive_section: str = None) -> str:
         from section_headers import ROLE_SECTION_HEADERS
-        import re
         from datetime import datetime
+        import re
 
         lines = text.split('\n')
+        body_html_parts = []
+        summary_html = ""
         in_code_block = False
         code_buffer = []
-        summary_html = ""
-        body_html_parts = []
+        is_collecting_summary = False
 
-        collecting_summary = False
-
-        # Parse narrative text
         for line in lines:
             stripped = line.strip()
 
@@ -63,21 +61,16 @@ class WeasyPDFWriter:
                 continue
 
             if "**Executive Summary**" in stripped:
-                collecting_summary = True
+                is_collecting_summary = True
                 continue
 
-            if collecting_summary:
+            if is_collecting_summary:
                 if not stripped:
-                    collecting_summary = False
+                    is_collecting_summary = False
                     continue
                 summary_html += f"<p>{stripped}</p>"
-            else:
-                if stripped.startswith("- "):
-                    body_html_parts.append(f"<p>{stripped}</p>")
-                elif stripped.startswith("**") and stripped.endswith("**"):
-                    body_html_parts.append(f"<p><strong>{stripped.strip('**')}</strong></p>")
-                elif stripped:
-                    body_html_parts.append(f"<p>{stripped}</p>")
+            elif stripped:
+                body_html_parts.append(f"<p>{stripped}</p>")
 
         section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
         chunk_size = max(1, len(body_html_parts) // len(section_headers))
@@ -95,38 +88,53 @@ class WeasyPDFWriter:
             <p><em>Generated on: {timestamp}</em></p>
         """
 
+        # ✅ Executive Summary
         if summary_html:
-            html += "<h2>Executive Summary</h2>" + summary_html
+            html += "<h2>Executive Summary</h2>"
+            html += summary_html
 
-        # TOC
+        # ✅ Table of Contents (dynamic)
         html += "<h2>Table of Contents</h2><ul>"
+        toc_entries = []
+        rendered_sections = []
+
         for i, header in enumerate(section_headers):
             section_id = f"section{i+1}"
+            paras = body_html_parts[i * chunk_size: (i + 1) * chunk_size]
+            has_real_content = any(p.strip("<p>").strip("</p>").strip() for p in paras if not p.startswith("<pre>"))
+
+            if has_real_content or any(p.startswith("<pre>") for p in paras):  # also check for code blocks
+                toc_entries.append((section_id, header))
+                rendered_sections.append((section_id, header, paras))
+
+        for section_id, header in toc_entries:
             html += f'<li><a href="#{section_id}">{header}</a></li>'
         if competitive_section:
             html += '<li><a href="#competitive">Competitive Landscape</a></li>'
         html += "</ul>"
 
-        # Key Findings
+        # ✅ Key Findings
         if key_findings:
             html += "<h2>Key Findings</h2><ul>"
-            html += ''.join(f"<li>{point.strip()}</li>" for point in key_findings if point.strip())
+            for point in key_findings:
+                if point.strip():
+                    html += f"<li>{point.strip()}</li>"
             html += "</ul>"
 
-        # Narrative Sections
-        for i, header in enumerate(section_headers):
-            section_id = f"section{i+1}"
+        # ✅ Render narrative sections
+        for section_id, header, paras in rendered_sections:
             html += f'<h2 id="{section_id}">{header}</h2>'
-            for para in body_html_parts[i * chunk_size: (i + 1) * chunk_size]:
+            for para in paras:
                 html += para
 
-        # Competitive Section
+        # ✅ Render competitive section if present
         if competitive_section:
             html += '<h2 id="competitive">Competitive Landscape</h2>'
-            html += competitive_section  # assumes it's valid HTML (not markdown)
+            html += competitive_section
 
         html += "</body></html>"
         return html
+
 
 
 
@@ -186,6 +194,7 @@ class WeasyPDFWriter:
                 word-break: break-word;
             }
         """)
+
 
 
 

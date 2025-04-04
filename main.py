@@ -7,11 +7,11 @@ This script analyzes GitHub or GitLab repositories based on a specified role
 and provides answers to predefined questions in a PDF document.
 
 Usage:
-    python main_repo_analyst.py --url <repository_url> --role <role> [--persistent]
-    python main_repo_analyst.py --local-path <repository_path> --role <role>
+    python main.py --url <repository_url> --role <role> [--persistent]
+    python main.py --local-path <repository_path> --role <role>
 
 Example:
-    python main_repo_analyst.py --url https://github.com/fastapi-users/fastapi-users --role programmer --persistent
+    python main.py --url https://github.com/fastapi-users/fastapi-users --role programmer --persistent
 """
 import argparse
 import os
@@ -266,7 +266,7 @@ def main():
             qa_pairs=report_data["qa_pairs"],
             model=args.narrative_model
         )
-
+        report_data["answers"] = report_data.get("qa_pairs", [])
         raw_narrative = agent.build_narrative(report_data)
         narrative, findings = extract_narrative_and_key_findings(raw_narrative)
 

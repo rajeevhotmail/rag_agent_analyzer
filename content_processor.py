@@ -56,6 +56,22 @@ LANG_CPP = "cpp"
 LANG_CSHARP = "csharp"
 LANG_UNKNOWN = "unknown"
 
+from tree_sitter import Language, Parser
+
+# Build Tree-sitter language library only once
+TREE_SITTER_JAVA_PATH = os.path.join(os.path.dirname(__file__), 'tree_sitter_languages', 'tree-sitter-java')
+TREE_SITTER_LIB_PATH = os.path.join(os.path.dirname(__file__), 'tree-sitter-java-libs.so')
+
+if not os.path.exists(TREE_SITTER_LIB_PATH):
+    Language.build_library(
+        TREE_SITTER_LIB_PATH,
+        [TREE_SITTER_JAVA_PATH]
+    )
+
+JAVA_LANGUAGE = Language(TREE_SITTER_LIB_PATH, 'java')
+JAVA_PARSER = Parser()
+JAVA_PARSER.set_language(JAVA_LANGUAGE)
+
 
 class ContentChunk:
     """Represents a chunk of content with metadata for embedding."""
@@ -343,6 +359,8 @@ class ContentProcessor:
         # Use language-specific processing
         if language == LANG_PYTHON:
             chunks = self._process_python_code(file_path, content)
+        elif language == LANG_JAVA:
+            chunks = self._process_java_code(file_path, content)
         else:
             # For other languages, use generic chunking
             self.logger.debug(f"Using generic chunking for {language} file: {file_path}")
@@ -476,6 +494,78 @@ class ContentProcessor:
                 content, file_path, FILE_TYPE_CODE, LANG_PYTHON,
                 chunk_size=1500, overlap=200
             )
+
+    def _process_class_node(self, class_node, file_path, content):
+        local_chunks = []
+        def get_node_text(node):
+            return content[node.start_byte:node.end_byte]
+
+        def get_line_range(node):
+            return node.start_point[0] + 1, node.end_point[0] + 1
+
+        class_text = get_node_text(class_node)
+        start, end = get_line_range(class_node)
+        class_name_node = class_node.child_by_field_name("name")
+        class_name = get_node_text(class_name_node) if class_name_node else "UnknownClass"
+
+        local_chunks.append(ContentChunk(
+            content=class_text,
+            file_path=file_path,
+            chunk_type=FILE_TYPE_CODE,
+            start_line=start,
+            end_line=end,
+            language="java",
+            name=class_name,
+            metadata={"type": "class"}
+        ))
+
+        for child in class_node.children:
+            if child.type == "method_declaration":
+                method_text = get_node_text(child)
+                method_name_node = child.child_by_field_name("name")
+                method_name = get_node_text(method_name_node) if method_name_node else "UnknownMethod"
+                m_start, m_end = get_line_range(child)
+
+                local_chunks.append(ContentChunk(
+                    content=method_text,
+                    file_path=file_path,
+                    chunk_type=FILE_TYPE_CODE,
+                    start_line=m_start,
+                    end_line=m_end,
+                    language="java",
+                    parent=class_name,
+                    name=method_name,
+                    metadata={"type": "method"}
+                ))
+
+        return local_chunks
+
+    def _process_java_code(self, file_path: str, content: str) -> List[ContentChunk]:
+        """
+        Process Java file using Tree-sitter to extract classes and methods.
+        """
+        chunks = []
+        tree = JAVA_PARSER.parse(bytes(content, "utf8"))
+        root = tree.root_node
+
+        def get_node_text(node):
+            return content[node.start_byte:node.end_byte]
+
+        def get_line_range(node):
+            return node.start_point[0] + 1, node.end_point[0] + 1
+
+        def find_classes_and_methods(node):
+            for child in node.children:
+                if child.type == "class_declaration":
+                    class_chunks = self._process_class_node(child, file_path, content)
+                    chunks.extend(class_chunks)
+                else:
+                    find_classes_and_methods(child)
+
+        find_classes_and_methods(root)
+        return chunks
+
+
 
     def _process_documentation_file(self, file_path: str, content: str, language: str) -> List[ContentChunk]:
         """
