@@ -153,11 +153,26 @@ def load_json(path):
     with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def process_repository_content(repo_path, data_dir, log_level):
+def process_repository_content(repo_path, data_dir, log_level, logger):
     processor = ContentProcessor(repo_path, log_level=log_level)
     chunks = processor.process_repository()
     processor.chunks = chunks  # Required!
-    return processor.save_chunks(data_dir)
+
+    # Get the syntax error report
+    syntax_error_report = processor.get_syntax_error_report()
+
+    # Save the syntax error report to a file
+    error_report_file = os.path.join(data_dir, f"{os.path.basename(repo_path)}_syntax_errors.json")
+    with open(error_report_file, 'w', encoding='utf-8') as f:
+        json.dump(syntax_error_report, f, indent=2)
+
+    # Log a summary of the syntax errors
+    if syntax_error_report['has_syntax_errors']:
+        logger.warning(syntax_error_report['summary'])
+    else:
+        logger.info("No syntax errors found in the repository")
+
+    return processor.save_chunks(data_dir), syntax_error_report
 
 def generate_embeddings(embeddings_dir, chunks_file, log_level):
     manager = EmbeddingsManager(output_dir=embeddings_dir, log_level=log_level)
@@ -222,9 +237,10 @@ def main():
 
         # Process the repo content into chunks
         if not args.skip_process:
-            chunks_file = process_repository_content(repo_path, dirs["data"], args.log_level)
+            chunks_file, syntax_error_report = process_repository_content(repo_path, dirs["data"], args.log_level, logger)
         else:
             chunks_file = os.path.join(dirs["data"], "_chunks.json")
+            syntax_error_report = None  # No syntax error report if skipping processing
             if not os.path.exists(chunks_file):
                 logger.error("Missing chunks file and --skip-process was used")
                 sys.exit(1)
@@ -253,9 +269,14 @@ def main():
                 logger.error("Missing report_data.json and --skip-rag was used")
                 sys.exit(1)
             report_data = load_json(report_data_file)
+            # Add syntax error report to existing report data if available
+            if syntax_error_report:
+                report_data["syntax_errors"] = syntax_error_report
             logger.info("✅ Loaded existing report_data.json")
         else:
             report_data = generate_report_data(args, rag_engine, logger)
+            if syntax_error_report:
+                report_data["syntax_errors"] = syntax_error_report
             save_json(report_data_file, report_data)
             logger.info("💾 Saved new report_data.json")
 
@@ -264,7 +285,8 @@ def main():
             role=report_data["role"],
             repo_name=report_data["repository"]["name"],
             qa_pairs=report_data["qa_pairs"],
-            model=args.narrative_model
+            model=args.narrative_model,
+            syntax_errors=report_data.get("syntax_errors")
         )
         report_data["answers"] = report_data.get("qa_pairs", [])
         raw_narrative = agent.build_narrative(report_data)

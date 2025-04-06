@@ -73,6 +73,76 @@ JAVA_PARSER.set_language(JAVA_LANGUAGE)
 GO_LANGUAGE = Language(TREE_SITTER_LIB_PATH, "go")
 
 
+class SyntaxErrorTracker:
+    """Tracks syntax errors across different file types during repository processing."""
+
+    def __init__(self):
+        self.errors = []
+        self.error_count = 0
+
+    def add_error(self, file_path, language, error_msg, line_number=None, function_name=None):
+        """
+        Record a syntax error.
+
+        Args:
+            file_path: Path to the file with the error
+            language: Programming language of the file
+            error_msg: Error message or description
+            line_number: Line number where the error occurred (optional)
+            function_name: Function or class name containing the error (optional)
+        """
+        self.errors.append({
+            'file_path': file_path,
+            'language': language,
+            'error_msg': error_msg,
+            'line_number': line_number,
+            'function_name': function_name
+        })
+        self.error_count += 1
+
+    def has_errors(self):
+        """Check if any syntax errors were found."""
+        return self.error_count > 0
+
+    def get_errors(self):
+        """Get all recorded syntax errors."""
+        return self.errors
+
+    def get_error_count(self):
+        """Get the total number of syntax errors."""
+        return self.error_count
+
+    def generate_report(self):
+        """Generate a formatted report of all syntax errors."""
+        if not self.has_errors():
+            return {
+                "has_syntax_errors": False,
+                "error_count": 0,
+                "summary": "No syntax errors were detected in the codebase.",
+                "errors": []
+            }
+
+        # Group errors by language
+        errors_by_language = {}
+        for error in self.errors:
+            lang = error['language']
+            if lang not in errors_by_language:
+                errors_by_language[lang] = []
+            errors_by_language[lang].append(error)
+
+        # Create summary
+        languages_with_errors = list(errors_by_language.keys())
+        error_summary = f"Found {self.error_count} syntax errors across {len(languages_with_errors)} languages: {', '.join(languages_with_errors)}"
+
+        return {
+            "has_syntax_errors": True,
+            "error_count": self.error_count,
+            "summary": error_summary,
+            "errors": self.errors,
+            "errors_by_language": errors_by_language
+        }
+
+
 class ContentChunk:
     """Represents a chunk of content with metadata for embedding."""
 
@@ -155,6 +225,8 @@ class ContentProcessor:
         """
         self.repo_path = repo_path
         self.chunks = []
+        # Initialize the syntax error tracker
+        self.error_tracker = SyntaxErrorTracker()
 
         # Setup processor-specific logger
         self.logger = logging.getLogger(f"content_processor.{os.path.basename(repo_path)}")
@@ -483,6 +555,13 @@ class ContentProcessor:
         except SyntaxError as e:
             # Handle Python syntax errors
             self.logger.warning(f"Syntax error in Python file {file_path}: {e}")
+            # Track the error
+            self.error_tracker.add_error(
+                file_path=file_path,
+                language=LANG_PYTHON,
+                error_msg=str(e),
+                line_number=getattr(e, 'lineno', None)
+            )
             # Fall back to generic chunking
             return self._chunk_by_size(
                 content, file_path, FILE_TYPE_CODE, LANG_PYTHON,
@@ -543,58 +622,101 @@ class ContentProcessor:
         return local_chunks
 
     def _process_go_code(self, file_path, content):
-        parser = Parser()
-        parser.set_language(GO_LANGUAGE)
-        tree = parser.parse(bytes(content, "utf8"))
-        root = tree.root_node
+        try:
+            parser = Parser()
+            parser.set_language(GO_LANGUAGE)
+            tree = parser.parse(bytes(content, "utf8"))
+            root = tree.root_node
 
-        chunks = []
+            # Check if tree-sitter encountered errors during parsing
+            if root.has_error:
+                # Track the error but continue processing
+                self.error_tracker.add_error(
+                    file_path=file_path,
+                    language=LANG_GO,
+                    error_msg="Go syntax error detected by tree-sitter"
+                )
+                self.logger.warning(f"Syntax error in Go file {file_path}")
 
-        def extract_chunks(node):
-            if node.type in ["function_declaration", "method_declaration", "type_declaration", "struct_type"]:
-                code = content[node.start_byte:node.end_byte]
-                name_node = node.child_by_field_name("name")
-                name = name_node.text.decode() if name_node else "unnamed"
-                chunks.append({
-                    "file_path": file_path,
-                    "language": "go",
-                    "name": name,
-                    "type": node.type,
-                    "start_line": node.start_point[0] + 1,
-                    "end_line": node.end_point[0] + 1,
-                    "content": code.strip()
-                })
-            for child in node.children:
-                extract_chunks(child)
+            chunks = []
 
-        extract_chunks(root)
-        return chunks
+            def extract_chunks(node):
+                if node.type in ["function_declaration", "method_declaration", "type_declaration", "struct_type"]:
+                    code = content[node.start_byte:node.end_byte]
+                    name_node = node.child_by_field_name("name")
+                    name = name_node.text.decode() if name_node else "unnamed"
+                    chunks.append({
+                        "file_path": file_path,
+                        "language": "go",
+                        "name": name,
+                        "type": node.type,
+                        "start_line": node.start_point[0] + 1,
+                        "end_line": node.end_point[0] + 1,
+                        "content": code.strip()
+                    })
+                for child in node.children:
+                    extract_chunks(child)
+
+            extract_chunks(root)
+            return chunks
+
+        except Exception as e:
+            self.logger.error(f"Error processing Go file {file_path}: {e}", exc_info=True)
+            self.error_tracker.add_error(
+                file_path=file_path,
+                language=LANG_GO,
+                error_msg=f"Failed to parse: {str(e)}"
+            )
+            return []  # Return empty list on failure
+
     def _process_java_code(self, file_path: str, content: str) -> List[ContentChunk]:
         """
         Process Java file using Tree-sitter to extract classes and methods.
         """
         chunks = []
-        tree = JAVA_PARSER.parse(bytes(content, "utf8"))
-        root = tree.root_node
+        try:
+            tree = JAVA_PARSER.parse(bytes(content, "utf8"))
+            root = tree.root_node
 
-        def get_node_text(node):
-            return content[node.start_byte:node.end_byte]
+            # Check if tree-sitter encountered errors during parsing
+            if root.has_error:
+                # Track the error but continue processing
+                self.error_tracker.add_error(
+                    file_path=file_path,
+                    language=LANG_JAVA,
+                    error_msg="Java syntax error detected by tree-sitter"
+                )
+                self.logger.warning(f"Syntax error in Java file {file_path}")
 
-        def get_line_range(node):
-            return node.start_point[0] + 1, node.end_point[0] + 1
+            def get_node_text(node):
+                return content[node.start_byte:node.end_byte]
 
-        def find_classes_and_methods(node):
-            for child in node.children:
-                if child.type == "class_declaration":
-                    class_chunks = self._process_class_node(child, file_path, content)
-                    chunks.extend(class_chunks)
-                else:
-                    find_classes_and_methods(child)
+            def get_line_range(node):
+                return node.start_point[0] + 1, node.end_point[0] + 1
 
-        find_classes_and_methods(root)
-        return chunks
+            def find_classes_and_methods(node):
+                for child in node.children:
+                    if child.type == "class_declaration":
+                        class_chunks = self._process_class_node(child, file_path, content)
+                        chunks.extend(class_chunks)
+                    else:
+                        find_classes_and_methods(child)
 
+            find_classes_and_methods(root)
+            return chunks
 
+        except Exception as e:
+            self.logger.error(f"Error processing Java file {file_path}: {e}", exc_info=True)
+            self.error_tracker.add_error(
+                file_path=file_path,
+                language=LANG_JAVA,
+                error_msg=f"Failed to parse: {str(e)}"
+            )
+            # Fall back to generic chunking
+            return self._chunk_by_size(
+                content, file_path, FILE_TYPE_CODE, LANG_JAVA,
+                chunk_size=1500, overlap=200
+            )
 
     def _process_documentation_file(self, file_path: str, content: str, language: str) -> List[ContentChunk]:
         """
@@ -852,6 +974,10 @@ class ContentProcessor:
 
         return all_chunks
 
+    def get_syntax_error_report(self):
+        """Get a report of all syntax errors encountered during processing."""
+        return self.error_tracker.generate_report()
+
     def save_chunks(self, output_dir: str) -> str:
         """
         Save all chunks to a JSON file.
@@ -902,6 +1028,10 @@ if __name__ == "__main__":
     processor = ContentProcessor(args.repo_path, log_level=log_level)
     chunks = processor.process_repository()
     processor.chunks = chunks
+
+    # Get syntax error report
+    syntax_error_report = processor.get_syntax_error_report()
+    print(f"Syntax Error Report: {syntax_error_report['summary'] if syntax_error_report['has_syntax_errors'] else 'No syntax errors found'}")
 
     # Save chunks to file
     output_file = processor.save_chunks(args.output_dir)

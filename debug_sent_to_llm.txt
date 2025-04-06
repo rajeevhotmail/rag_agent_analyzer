@@ -1,0 +1,1828 @@
+
+
+====== Prompt Sent to LLM for Question: "What programming languages are used in this project?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What programming languages are used in this project?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this language-related question:
+                - Focus on identifying all programming languages used in the repository
+                - Report the percentage breakdown of languages if available
+                - Mention the primary language and secondary languages
+                - Refer to specific files or directories that demonstrate language usage
+                - If language statistics are provided, include them in your answer
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What programming languages are used in this project?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/index.rst
+.. rst-class:: hide-header
+
+Welcome to Flask
+================
+
+.. image:: _static/flask-horizontal.png
+    :align: center
+
+Welcome to Flask's documentation. Flask is a lightweight WSGI web application framework.
+It is designed to make getting started quick and easy, with the ability to scale up to
+complex applications.
+
+Get started with :doc:`installation`
+and then get an overview with the :doc:`quickstart`. There is also a
+more detailed :doc:`tutorial/index` that shows how to create a small but
+complete application with Flask. Common patterns are described in the
+:doc:`patterns/index` section. The rest of the docs describe each
+component of Flask in detail, with a full reference in the :doc:`api`
+section.
+
+Flask depends on the `Werkzeug`_ WSGI toolkit, the `Jinja`_ template engine, and the
+`Click`_ CLI toolkit. Be sure to check their documentation as well as Flask's when
+looking for information.
+
+.. _Werkzeug: https://werkzeug.palletsprojects.com
+.. _Jinja: https://jinja.palletsprojec... [truncated]
+
+
+DOC 2 - File: docs/installation.rst
+Installation
+============
+
+
+Python Version
+--------------
+
+We recommend using the latest version of Python. Flask supports Python 3.9 and newer.
+
+
+Dependencies
+------------
+
+These distributions will be installed automatically when installing Flask.
+
+* `Werkzeug`_ implements WSGI, the standard Python interface between
+  applications and servers.
+* `Jinja`_ is a template language that renders the pages your application
+  serves.
+* `MarkupSafe`_ comes with Jinja. It escapes untrusted input when rendering
+  templates to avoid injection attacks.
+* `ItsDangerous`_ securely signs data to ensure its integrity. This is used
+  to protect Flask's session cookie.
+* `Click`_ is a framework for writing command line applications. It provides
+  the ``flask`` command and allows adding custom management commands.
+* `Blinker`_ provides support for :doc:`signals`.
+
+.. _Werkzeug: https://palletsprojects.com/p/werkzeug/
+.. _Jinja: https://palletsprojects.com/p/jinja/
+.. _MarkupSafe: https://palletsprojects.... [truncated]
+
+
+DOC 3 - File: docs/extensions.rst
+Extensions
+==========
+
+Extensions are extra packages that add functionality to a Flask
+application. For example, an extension might add support for sending
+email or connecting to a database. Some extensions add entire new
+frameworks to help build certain types of applications, like a REST API.
+
+
+Finding Extensions
+------------------
+
+Flask extensions are usually named "Flask-Foo" or "Foo-Flask". You can
+search PyPI for packages tagged with `Framework :: Flask <pypi_>`_.
+
+
+Using Extensions
+----------------
+
+Consult each extension's documentation for installation, configuration,
+and usage instructions. Generally, extensions pull their own
+configuration from :attr:`app.config <flask.Flask.config>` and are
+passed an application instance during initialization. For example,
+an extension called "Flask-Foo" might be used like this::
+
+    from flask_foo import Foo
+
+    foo = Foo()
+
+    app = Flask(__name__)
+    app.config.update(
+        FOO_BAR='baz',
+        FOO_SPAM='eggs',
+    )
+
+    foo.in... [truncated]
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/sansio/app.py
+Def: App
+```
+class App(Scaffold):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your applicatio... [truncated]
+```
+
+
+CODE 2 - File: src/flask/app.py
+Def: Flask
+```
+class Flask(App):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your application i... [truncated]
+```
+
+
+## OTHER CONTEXT
+
+OTHER 1 - File: repository_info/languages
+This repository contains multiple programming languages. The primary languages used are: Python (17825%), HTML (362%), YAML (198%), Markdown (151%), CSS (135%)
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What is the project's architecture/structure?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What is the project's architecture/structure?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this architecture-related question:
+                - Describe the high-level architecture of the project
+                - Identify the main directories/modules and their responsibilities
+                - Explain how the components interact with each other
+                - Mention any design patterns or architectural styles used
+                - Focus on the organizational structure rather than implementation details
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What is the project's architecture/structure?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/patterns/index.rst
+Patterns for Flask
+==================
+
+Certain features and interactions are common enough that you will find
+them in most web applications. For example, many applications use a
+relational database and user authentication. They will open a database
+connection at the beginning of the request and get the information for
+the logged in user. At the end of the request, the database connection
+is closed.
+
+These types of patterns may be a bit outside the scope of Flask itself,
+but Flask makes it easy to implement them. Some common patterns are
+collected in the following pages.
+
+.. toctree::
+   :maxdepth: 2
+
+   packages
+   appfactories
+   appdispatch
+   urlprocessors
+   sqlite3
+   sqlalchemy
+   fileuploads
+   caching
+   viewdecorators
+   wtforms
+   templateinheritance
+   flashing
+   javascript
+   lazyloading
+   mongoengine
+   favicon
+   streaming
+   deferredcallbacks
+   methodoverrides
+   requestchecksum
+   celery
+   subclassing
+   singlepageapplications
+
+
+DOC 2 - File: docs/index.rst
+.. rst-class:: hide-header
+
+Welcome to Flask
+================
+
+.. image:: _static/flask-horizontal.png
+    :align: center
+
+Welcome to Flask's documentation. Flask is a lightweight WSGI web application framework.
+It is designed to make getting started quick and easy, with the ability to scale up to
+complex applications.
+
+Get started with :doc:`installation`
+and then get an overview with the :doc:`quickstart`. There is also a
+more detailed :doc:`tutorial/index` that shows how to create a small but
+complete application with Flask. Common patterns are described in the
+:doc:`patterns/index` section. The rest of the docs describe each
+component of Flask in detail, with a full reference in the :doc:`api`
+section.
+
+Flask depends on the `Werkzeug`_ WSGI toolkit, the `Jinja`_ template engine, and the
+`Click`_ CLI toolkit. Be sure to check their documentation as well as Flask's when
+looking for information.
+
+.. _Werkzeug: https://werkzeug.palletsprojects.com
+.. _Jinja: https://jinja.palletsprojec... [truncated]
+
+
+DOC 3 - File: docs/lifecycle.rst
+Application Structure and Lifecycle
+===================================
+
+Flask makes it pretty easy to write a web application. But there are quite a few
+different parts to an application and to each request it handles. Knowing what happens
+during application setup, serving, and handling requests will help you know what's
+possible in Flask and how to structure your application.
+
+
+Application Setup
+-----------------
+
+The first step in creating a Flask application is creating the application object. Each
+Flask application is an instance of the :class:`.Flask` class, which collects all
+configuration, extensions, and views.
+
+.. code-block:: python
+
+    from flask import Flask
+
+    app = Flask(__name__)
+    app.config.from_mapping(
+        SECRET_KEY="dev",
+    )
+    app.config.from_prefixed_env()
+
+    @app.route("/")
+    def index():
+        return "Hello, World!"
+
+This is known as the "application setup phase", it's the code you write that's outside
+any view functions or other handlers. I... [truncated]
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/app.py
+Def: Flask
+```
+class Flask(App):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your application i... [truncated]
+```
+
+
+CODE 2 - File: src/flask/sansio/app.py
+Def: App
+```
+class App(Scaffold):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your applicatio... [truncated]
+```
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What are the main components/modules of the project?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What are the main components/modules of the project?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this component-related question:
+                - List all major components/modules in the project
+                - Describe the purpose of each component
+                - Explain how the components are organized
+                - Highlight key files or functionalities within each component
+                - Include information about how components interact if available
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What are the main components/modules of the project?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/index.rst
+.. rst-class:: hide-header
+
+Welcome to Flask
+================
+
+.. image:: _static/flask-horizontal.png
+    :align: center
+
+Welcome to Flask's documentation. Flask is a lightweight WSGI web application framework.
+It is designed to make getting started quick and easy, with the ability to scale up to
+complex applications.
+
+Get started with :doc:`installation`
+and then get an overview with the :doc:`quickstart`. There is also a
+more detailed :doc:`tutorial/index` that shows how to create a small but
+complete application with Flask. Common patterns are described in the
+:doc:`patterns/index` section. The rest of the docs describe each
+component of Flask in detail, with a full reference in the :doc:`api`
+section.
+
+Flask depends on the `Werkzeug`_ WSGI toolkit, the `Jinja`_ template engine, and the
+`Click`_ CLI toolkit. Be sure to check their documentation as well as Flask's when
+looking for information.
+
+.. _Werkzeug: https://werkzeug.palletsprojects.com
+.. _Jinja: https://jinja.palletsprojec... [truncated]
+
+
+DOC 2 - File: docs/tutorial/index.rst
+or code layout. However, when first starting, it's helpful to use a more
+structured approach. This means that the tutorial will require a bit of
+boilerplate up front, but it's done to avoid many common pitfalls that
+new developers encounter, and it creates a project that's easy to expand
+on. Once you become more comfortable with Flask, you can step out of
+this structure and take full advantage of Flask's flexibility.
+
+.. image:: flaskr_edit.png
+    :align: center
+    :class: screenshot
+    :alt: screenshot of edit page
+
+:gh:`The tutorial project is available as an example in the Flask
+repository <examples/tutorial>`, if you want to compare your project
+with the final product as you follow the tutorial.
+
+Continue to :doc:`layout`.
+
+
+DOC 3 - File: README.md
+Section: Donate
+## Donate
+
+The Pallets organization develops and supports Flask and the libraries
+it uses. In order to grow the community of contributors and users, and
+allow the maintainers to devote more time to the projects, [please
+donate today].
+
+[please donate today]: https://palletsprojects.com/donate
+
+
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/app.py
+Def: Flask
+```
+class Flask(App):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your application i... [truncated]
+```
+
+
+CODE 2 - File: src/flask/sansio/app.py
+Def: App
+```
+class App(Scaffold):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your applicatio... [truncated]
+```
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What testing framework(s) are used?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What testing framework(s) are used?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this testing-related question:
+                - Identify the testing frameworks and tools used
+                - Describe the testing approach (unit tests, integration tests, etc.)
+                - Mention any test fixtures, mocks, or utilities
+                - Note the test directory structure and organization
+                - Highlight any test configuration files or patterns
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What testing framework(s) are used?
+            
+            Here is the relevant information from the repository:
+            
+            
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: tests/test_user_error_handler.py
+Def: test_error_handler_no_match
+```
+def test_error_handler_no_match(app, client):
+    class CustomException(Exception):
+        pass
+
+    @app.errorhandler(CustomException)
+    def custom_exception_handler(e):
+        assert isinstance(e, CustomException)
+        return "custom"
+
+    with pytest.raises(TypeError) as exc_info:
+        app.register_error_handler(CustomException(), None)
+
+    assert "CustomException() is an instance, not a class." in str(exc_info.value)
+
+    with pytest.raises(ValueError) as exc_info:
+        app.register_error_handler(list, None)
+
+    assert "'list' is not a subclass of Exception." in str(exc_info.value)
+
+    @app.errorhandler(500)
+    def handle_500(e):
+        assert isinstance(e, InternalServerError)
+
+        if e.original_exception is not None:
+            return f"wrapped {type(e.original_exception).__name__}"
+
+        return "direct"
+
+    with pytest.raises(ValueError) as exc_info:
+        app.register_error_handler(999, None)
+
+    assert "Use a subclass of HTTPException" in str(exc_info.value)
+
+    @app.route("/custom")
+    def custom_test():
+        raise CustomException()
+
+    @app.route("/keyerror")
+    def key_error():
+        raise KeyError()
+
+    @app.route("/abort")
+    def do_abort():
+        flask.abort(500)
+
+    app.testing = False
+    assert client.get("/custom").data == b"custom"
+    assert client.get("/keyerror").data == b"wrapped KeyError"
+    assert client.get("/abort").data == b"direct"
+```
+
+
+CODE 2 - File: tests/test_cli.py
+Def: TestRoutes
+```
+class TestRoutes:
+    @pytest.fixture
+    def app(self):
+        app = Flask(__name__)
+        app.add_url_rule(
+            "/get_post/<int:x>/<int:y>",
+            methods=["GET", "POST"],
+            endpoint="yyy_get_post",
+        )
+        app.add_url_rule("/zzz_post", methods=["POST"], endpoint="aaa_post")
+        return app
+
+    @pytest.fixture
+    def invoke(self, app, runner):
+        cli = FlaskGroup(create_app=lambda: app)
+        return partial(runner.invoke, cli)
+
+    def expect_order(self, order, output):
+        # skip the header and match the start of each row
+        for expect, line in zip(order, output.splitlines()[2:]):
+            # do this instead of startswith for nicer pytest output
+            assert line[: len(expect)] == expect
+
+    def test_simple(self, invoke):
+        result = invoke(["routes"])
+        assert result.exit_code == 0
+        self.expect_order(["aaa_post", "static", "yyy_get_post"], result.output)
+
+    def test_sort(self, app, invoke):
+        default_output = invoke(["routes"]).output
+        endpoint_output = invoke(["routes", "-s", "endpoint"]).output
+        assert default_output == endpoint_output
+        self.expect_order(
+            ["static", "yyy_get_post", "aaa_post"],
+            invoke(["routes", "-s", "methods"]).output,
+        )
+        self.expect_order(
+            ["yyy_get_post", "static", "aaa_post"],
+            invoke(["routes", "-s", "rule"]).output,
+        )
+        match_order = [r.endpoint for r in app.u... [truncated]
+```
+
+
+CODE 3 - File: examples/tutorial/tests/test_auth.py
+Def: test_login_validate_input
+```
+def test_login_validate_input(auth, username, password, message):
+    response = auth.login(username, password)
+    assert message in response.data
+```
+
+
+CODE 4 - File: tests/test_cli.py
+Def: test_run_cert_path
+```
+def test_run_cert_path():
+    # no key
+    with pytest.raises(click.BadParameter):
+        run_command.make_context("run", ["--cert", __file__])
+
+    # no cert
+    with pytest.raises(click.BadParameter):
+        run_command.make_context("run", ["--key", __file__])
+
+    # cert specified first
+    ctx = run_command.make_context("run", ["--cert", __file__, "--key", __file__])
+    assert ctx.params["cert"] == (__file__, __file__)
+
+    # key specified first
+    ctx = run_command.make_context("run", ["--key", __file__, "--cert", __file__])
+    assert ctx.params["cert"] == (__file__, __file__)
+```
+
+
+CODE 5 - File: examples/tutorial/tests/test_db.py
+Def: test_get_close_db
+```
+def test_get_close_db(app):
+    with app.app_context():
+        db = get_db()
+        assert db is get_db()
+
+    with pytest.raises(sqlite3.ProgrammingError) as e:
+        db.execute("SELECT 1")
+
+    assert "closed" in str(e.value)
+```
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What dependencies does this project have?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What dependencies does this project have?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this dependency-related question:
+                - List all external dependencies/libraries used by the project
+                - Identify the primary/core dependencies
+                - Note any dependency management tools used (npm, pip, etc.)
+                - Mention any version constraints or requirements
+                - Group related dependencies by their purpose if possible
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What dependencies does this project have?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/patterns/packages.rst
+does not want modules in packages to be the startup file.  But that is not
+a big problem, just add a new file called :file:`pyproject.toml` next to the inner
+:file:`yourapplication` folder with the following contents:
+
+.. code-block:: toml
+
+    [project]
+    name = "yourapplication"
+    dependencies = [
+        "flask",
+    ]
+
+    [build-system]
+    requires = ["flit_core<4"]
+    build-backend = "flit_core.buildapi"
+
+Install your application so it is importable:
+
+.. code-block:: text
+
+    $ pip install -e .
+
+To use the ``flask`` command and run your application you need to set
+the ``--app`` option that tells Flask where to find the application
+instance:
+
+.. code-block:: text
+
+    $ flask --app yourapplication run
+
+What did we gain from this?  Now we can restructure the application a bit
+into multiple modules.  The only thing you have to remember is the
+following quick checklist:
+
+1. the `Flask` application object creation has to be in the
+   :file:`__init__.py` file.  That way each mod... [truncated]
+
+
+DOC 2 - File: docs/installation.rst
+use them if you install them.
+
+* `python-dotenv`_ enables support for :ref:`dotenv` when running ``flask``
+  commands.
+* `Watchdog`_ provides a faster, more efficient reloader for the development
+  server.
+
+.. _python-dotenv: https://github.com/theskumar/python-dotenv#readme
+.. _watchdog: https://pythonhosted.org/watchdog/
+
+
+greenlet
+~~~~~~~~
+
+You may choose to use gevent or eventlet with your application. In this
+case, greenlet>=1.0 is required. When using PyPy, PyPy>=7.3.7 is
+required.
+
+These are not minimum supported versions, they only indicate the first
+versions that added necessary features. You should use the latest
+versions of each.
+
+
+Virtual environments
+--------------------
+
+Use a virtual environment to manage the dependencies for your project, both in
+development and in production.
+
+What problem does a virtual environment solve? The more Python projects you
+have, the more likely it is that you need to work with different versions of
+Python libraries, or even Python itself. N... [truncated]
+
+
+DOC 3 - File: docs/extensiondev.rst
+    The tests must be part of the sdist distribution.
+7.  A link to the documentation or project website must be in the PyPI
+    metadata or the readme. The documentation should use the Flask theme
+    from the `Official Pallets Themes`_.
+8.  The extension's dependencies should not use upper bounds or assume
+    any particular version scheme, but should use lower bounds to
+    indicate minimum compatibility support. For example,
+    ``sqlalchemy>=1.4``.
+9.  Indicate the versions of Python supported using ``python_requires=">=version"``.
+    Flask itself supports Python >=3.9 as of October 2024, and this will update
+    over time.
+
+.. _PyPI: https://pypi.org/search/?c=Framework+%3A%3A+Flask
+.. _Discord Chat: https://discord.gg/pallets
+.. _GitHub Discussions: https://github.com/pallets/flask/discussions
+.. _Official Pallets Themes: https://pypi.org/project/Pallets-Sphinx-Themes/
+.. _Pallets-Eco: https://github.com/pallets-eco
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/sansio/app.py
+Def: App
+```
+class App(Scaffold):
+    """The flask object implements a WSGI application and acts as the central
+    object.  It is passed the name of the module or package of the
+    application.  Once it is created it will act as a central registry for
+    the view functions, the URL rules, template configuration and much more.
+
+    The name of the package is used to resolve resources from inside the
+    package or the folder the module is contained in depending on if the
+    package parameter resolves to an actual python package (a folder with
+    an :file:`__init__.py` file inside) or a standard module (just a ``.py`` file).
+
+    For more information about resource loading, see :func:`open_resource`.
+
+    Usually you create a :class:`Flask` instance in your main module or
+    in the :file:`__init__.py` file of your package like this::
+
+        from flask import Flask
+        app = Flask(__name__)
+
+    .. admonition:: About the First Parameter
+
+        The idea of the first parameter is to give Flask an idea of what
+        belongs to your application.  This name is used to find resources
+        on the filesystem, can be used by extensions to improve debugging
+        information and a lot more.
+
+        So it's important what you provide there.  If you are using a single
+        module, `__name__` is always the correct value.  If you however are
+        using a package, it's usually recommended to hardcode the name of
+        your package there.
+
+        For example if your applicatio... [truncated]
+```
+
+
+## CONFIGURATION CONTEXT
+
+CONFIG 1 - File: examples/tutorial/pyproject.toml
+[project]
+name = "flaskr"
+version = "1.0.0"
+description = "The basic blog app built in the Flask tutorial."
+readme = "README.rst"
+license = {file = "LICENSE.txt"}
+maintainers = [{name = "Pallets", email = "contact@palletsprojects.com"}]
+classifiers = ["Private :: Do Not Upload"]
+dependencies = [
+    "flask",
+]
+
+[project.urls]
+Documentation = "https://flask.palletsprojects.com/tutorial/"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "flaskr"
+
+[tool.flit.sdist]
+include = [
+    "tests/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["flaskr", "tests"]
+
+[tool.ruff]
+src = ["src"]
+
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What is the code quality like (comments, documentation, etc.)?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What is the code quality like (comments, documentation, etc.)?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this code quality question:
+                - Assess the level of comments and documentation in the code
+                - Mention any code formatting tools or linters being used
+                - Note the presence of docstrings, type hints, or API docs
+                - Evaluate consistency in coding style and patterns
+                - Look for evidence of documentation practices or standards
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What is the code quality like (comments, documentation, etc.)?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/tutorial/index.rst
+Tutorial
+========
+
+.. toctree::
+    :caption: Contents:
+    :maxdepth: 1
+
+    layout
+    factory
+    database
+    views
+    templates
+    static
+    blog
+    install
+    tests
+    deploy
+    next
+
+This tutorial will walk you through creating a basic blog application
+called Flaskr. Users will be able to register, log in, create posts,
+and edit or delete their own posts. You will be able to package and
+install the application on other computers.
+
+.. image:: flaskr_index.png
+    :align: center
+    :class: screenshot
+    :alt: screenshot of index page
+
+It's assumed that you're already familiar with Python. The `official
+tutorial`_ in the Python docs is a great way to learn or review first.
+
+.. _official tutorial: https://docs.python.org/3/tutorial/
+
+While it's designed to give a good starting point, the tutorial doesn't
+cover all of Flask's features. Check out the :doc:`/quickstart` for an
+overview of what Flask can do, then dive into the docs to find out more.
+The tutorial only uses what'... [truncated]
+
+
+DOC 2 - File: docs/tutorial/index.rst
+or code layout. However, when first starting, it's helpful to use a more
+structured approach. This means that the tutorial will require a bit of
+boilerplate up front, but it's done to avoid many common pitfalls that
+new developers encounter, and it creates a project that's easy to expand
+on. Once you become more comfortable with Flask, you can step out of
+this structure and take full advantage of Flask's flexibility.
+
+.. image:: flaskr_edit.png
+    :align: center
+    :class: screenshot
+    :alt: screenshot of edit page
+
+:gh:`The tutorial project is available as an example in the Flask
+repository <examples/tutorial>`, if you want to compare your project
+with the final product as you follow the tutorial.
+
+Continue to :doc:`layout`.
+
+
+DOC 3 - File: docs/index.rst
+.. rst-class:: hide-header
+
+Welcome to Flask
+================
+
+.. image:: _static/flask-horizontal.png
+    :align: center
+
+Welcome to Flask's documentation. Flask is a lightweight WSGI web application framework.
+It is designed to make getting started quick and easy, with the ability to scale up to
+complex applications.
+
+Get started with :doc:`installation`
+and then get an overview with the :doc:`quickstart`. There is also a
+more detailed :doc:`tutorial/index` that shows how to create a small but
+complete application with Flask. Common patterns are described in the
+:doc:`patterns/index` section. The rest of the docs describe each
+component of Flask in detail, with a full reference in the :doc:`api`
+section.
+
+Flask depends on the `Werkzeug`_ WSGI toolkit, the `Jinja`_ template engine, and the
+`Click`_ CLI toolkit. Be sure to check their documentation as well as Flask's when
+looking for information.
+
+.. _Werkzeug: https://werkzeug.palletsprojects.com
+.. _Jinja: https://jinja.palletsprojec... [truncated]
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "Are there any known bugs or issues?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "Are there any known bugs or issues?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                Guidelines for this bug/issue question:
+                - Identify any explicitly mentioned bugs or issues
+                - Look for TODO comments, FIXME notes, or issue references
+                - Note any issue templates or bug reporting procedures
+                - Mention any open issues or known limitations documented
+                - Avoid speculation about potential bugs not mentioned in the context
+                
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: Are there any known bugs or issues?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/errorhandling.rst
+Handling Application Errors
+===========================
+
+Applications fail, servers fail. Sooner or later you will see an exception
+in production. Even if your code is 100% correct, you will still see
+exceptions from time to time. Why? Because everything else involved will
+fail. Here are some situations where perfectly fine code can lead to server
+errors:
+
+-   the client terminated the request early and the application was still
+    reading from the incoming data
+-   the database server was overloaded and could not handle the query
+-   a filesystem is full
+-   a harddrive crashed
+-   a backend server overloaded
+-   a programming error in a library you are using
+-   network connection of the server to another system failed
+
+And that's just a small sample of issues you could be facing. So how do we
+deal with that sort of problem? By default if your application runs in
+production mode, and an exception is raised Flask will display a very simple
+page for you and log the exception to the :a... [truncated]
+
+
+DOC 2 - File: CHANGES.rst
+-   Deprecated ``init_jinja_globals``. Override the
+    ``Flask.create_jinja_environment`` method instead to achieve the
+    same functionality.
+-   Added ``safe_join``.
+-   The automatic JSON request data unpacking now looks at the charset
+    mimetype parameter.
+-   Don't modify the session on ``get_flashed_messages`` if there are no
+    messages in the session.
+-   ``before_request`` handlers are now able to abort requests with
+    errors.
+-   It is not possible to define user exception handlers. That way you
+    can provide custom error messages from a central hub for certain
+    errors that might occur during request processing (for instance
+    database connection errors, timeouts from remote resources etc.).
+-   Blueprints can provide blueprint specific error handlers.
+-   Implemented generic class-based views.
+
+
+Version 0.6.1
+-------------
+
+Released 2010-12-31
+
+-   Fixed an issue where the default ``OPTIONS`` response was not
+    exposing all valid methods in the ``Allow`` head... [truncated]
+
+
+DOC 3 - File: CHANGES.rst
+-   Added ``MAX_COOKIE_SIZE`` and ``Response.max_cookie_size`` to
+    control when Werkzeug warns about large cookies that browsers may
+    ignore. :pr:`2693`
+-   Updated documentation theme to make docs look better in small
+    windows. :pr:`2709`
+-   Rewrote the tutorial docs and example project to take a more
+    structured approach to help new users avoid common pitfalls.
+    :pr:`2676`
+
+
+Version 0.12.5
+--------------
+
+Released 2020-02-10
+
+-   Pin Werkzeug to < 1.0.0. :issue:`3497`
+
+
+Version 0.12.4
+--------------
+
+Released 2018-04-29
+
+-   Repackage 0.12.3 to fix package layout issue. :issue:`2728`
+
+
+Version 0.12.3
+--------------
+
+Released 2018-04-26
+
+-   ``Request.get_json`` no longer accepts arbitrary encodings.
+    Incoming JSON should be encoded using UTF-8 per :rfc:`8259`, but
+    Flask will autodetect UTF-8, -16, or -32. :issue:`2692`
+-   Fix a Python warning about imports when using ``python -m flask``.
+    :issue:`2666`
+-   Fix a ``ValueError`` caused by invalid ``Range`` re... [truncated]
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/app.py
+Def: Flask.handle_exception
+```
+    def handle_exception(self, e: Exception) -> Response:
+        """Handle an exception that did not have an error handler
+        associated with it, or that was raised from an error handler.
+        This always causes a 500 ``InternalServerError``.
+
+        Always sends the :data:`got_request_exception` signal.
+
+        If :data:`PROPAGATE_EXCEPTIONS` is ``True``, such as in debug
+        mode, the error will be re-raised so that the debugger can
+        display it. Otherwise, the original exception is logged, and
+        an :exc:`~werkzeug.exceptions.InternalServerError` is returned.
+
+        If an error handler is registered for ``InternalServerError`` or
+        ``500``, it will be used. For consistency, the handler will
+        always receive the ``InternalServerError``. The original
+        unhandled exception is available as ``e.original_exception``.
+
+        .. versionchanged:: 1.1.0
+            Always passes the ``InternalServerError`` instance to the
+            handler, setting ``original_exception`` to the unhandled
+            error.
+
+        .. versionchanged:: 1.1.0
+            ``after_request`` functions and other finalization is done
+            even for the default 500 response when there is no handler.
+
+        .. versionadded:: 0.3
+        """
+        exc_info = sys.exc_info()
+        got_request_exception.send(self, _async_wrapper=self.ensure_sync, exception=e)
+        propagate = self.config["PROPAGATE_EXCEPTIONS"]
+
+        if propagate is None:
+      ... [truncated]
+```
+
+
+CODE 2 - File: src/flask/sansio/app.py
+Def: App.trap_http_exception
+```
+    def trap_http_exception(self, e: Exception) -> bool:
+        """Checks if an HTTP exception should be trapped or not.  By default
+        this will return ``False`` for all exceptions except for a bad request
+        key error if ``TRAP_BAD_REQUEST_ERRORS`` is set to ``True``.  It
+        also returns ``True`` if ``TRAP_HTTP_EXCEPTIONS`` is set to ``True``.
+
+        This is called for all HTTP exceptions raised by a view function.
+        If it returns ``True`` for any exception the error handler for this
+        exception is not called and it shows up as regular exception in the
+        traceback.  This is helpful for debugging implicitly raised HTTP
+        exceptions.
+
+        .. versionchanged:: 1.0
+            Bad request errors are not trapped by default in debug mode.
+
+        .. versionadded:: 0.8
+        """
+        if self.config["TRAP_HTTP_EXCEPTIONS"]:
+            return True
+
+        trap_bad_request = self.config["TRAP_BAD_REQUEST_ERRORS"]
+
+        # if unset, trap key errors in debug mode
+        if (
+            trap_bad_request is None
+            and self.debug
+            and isinstance(e, BadRequestKeyError)
+        ):
+            return True
+
+        if trap_bad_request:
+            return isinstance(e, BadRequest)
+
+        return False
+```
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What is the build/deployment process?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What is the build/deployment process?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What is the build/deployment process?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/deploying/index.rst
+Deploying to Production
+=======================
+
+After developing your application, you'll want to make it available
+publicly to other users. When you're developing locally, you're probably
+using the built-in development server, debugger, and reloader. These
+should not be used in production. Instead, you should use a dedicated
+WSGI server or hosting platform, some of which will be described here.
+
+"Production" means "not development", which applies whether you're
+serving your application publicly to millions of users or privately /
+locally to a single user. **Do not use the development server when
+deploying to production. It is intended for use only during local
+development. It is not designed to be particularly secure, stable, or
+efficient.**
+
+Self-Hosted Options
+-------------------
+
+Flask is a WSGI *application*. A WSGI *server* is used to run the
+application, converting incoming HTTP requests to the standard WSGI
+environ, and converting outgoing WSGI responses to HTTP responses.
+
+Th... [truncated]
+
+
+DOC 2 - File: requirements/build.txt
+#
+# This file is autogenerated by pip-compile with Python 3.13
+# by the following command:
+#
+#    pip-compile build.in
+#
+build==1.2.2.post1
+    # via -r build.in
+packaging==24.2
+    # via build
+pyproject-hooks==1.2.0
+    # via build
+
+
+DOC 3 - File: docs/tutorial/deploy.rst
+Deploy to Production
+====================
+
+This part of the tutorial assumes you have a server that you want to
+deploy your application to. It gives an overview of how to create the
+distribution file and install it, but won't go into specifics about
+what server or software to use. You can set up a new environment on your
+development computer to try out the instructions below, but probably
+shouldn't use it for hosting a real public application. See
+:doc:`/deploying/index` for a list of many different ways to host your
+application.
+
+
+Build and Install
+-----------------
+
+When you want to deploy your application elsewhere, you build a *wheel*
+(``.whl``) file. Install and use the ``build`` tool to do this.
+
+.. code-block:: none
+
+    $ pip install build
+    $ python -m build --wheel
+
+You can find the file in ``dist/flaskr-1.0.0-py3-none-any.whl``. The
+file name is in the format of {project name}-{version}-{python tag}
+-{abi tag}-{platform tag}.
+
+Copy this file to another machine,
+:ref:`set u... [truncated]
+
+
+## OTHER CONTEXT
+
+OTHER 1 - File: requirements/build.in
+build
+
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "How is version control used in the project?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "How is version control used in the project?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: How is version control used in the project?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: docs/templating.rst
+by default:
+
+.. data:: config
+   :noindex:
+
+   The current configuration object (:data:`flask.Flask.config`)
+
+   .. versionadded:: 0.6
+
+   .. versionchanged:: 0.10
+      This is now always available, even in imported templates.
+
+.. data:: request
+   :noindex:
+
+   The current request object (:class:`flask.request`).  This variable is
+   unavailable if the template was rendered without an active request
+   context.
+
+.. data:: session
+   :noindex:
+
+   The current session object (:class:`flask.session`).  This variable
+   is unavailable if the template was rendered without an active request
+   context.
+
+.. data:: g
+   :noindex:
+
+   The request-bound object for global variables (:data:`flask.g`).  This
+   variable is unavailable if the template was rendered without an active
+   request context.
+
+.. function:: url_for
+   :noindex:
+
+   The :func:`flask.url_for` function.
+
+.. function:: get_flashed_messages
+   :noindex:
+
+   The :func:`flask.get_flashed_messages` function.
+
+.. admonition:: The ... [truncated]
+
+
+DOC 2 - File: docs/installation.rst
+Installation
+============
+
+
+Python Version
+--------------
+
+We recommend using the latest version of Python. Flask supports Python 3.9 and newer.
+
+
+Dependencies
+------------
+
+These distributions will be installed automatically when installing Flask.
+
+* `Werkzeug`_ implements WSGI, the standard Python interface between
+  applications and servers.
+* `Jinja`_ is a template language that renders the pages your application
+  serves.
+* `MarkupSafe`_ comes with Jinja. It escapes untrusted input when rendering
+  templates to avoid injection attacks.
+* `ItsDangerous`_ securely signs data to ensure its integrity. This is used
+  to protect Flask's session cookie.
+* `Click`_ is a framework for writing command line applications. It provides
+  the ``flask`` command and allows adding custom management commands.
+* `Blinker`_ provides support for :doc:`signals`.
+
+.. _Werkzeug: https://palletsprojects.com/p/werkzeug/
+.. _Jinja: https://palletsprojects.com/p/jinja/
+.. _MarkupSafe: https://palletsprojects.... [truncated]
+
+
+DOC 3 - File: docs/extensiondev.rst
+    The tests must be part of the sdist distribution.
+7.  A link to the documentation or project website must be in the PyPI
+    metadata or the readme. The documentation should use the Flask theme
+    from the `Official Pallets Themes`_.
+8.  The extension's dependencies should not use upper bounds or assume
+    any particular version scheme, but should use lower bounds to
+    indicate minimum compatibility support. For example,
+    ``sqlalchemy>=1.4``.
+9.  Indicate the versions of Python supported using ``python_requires=">=version"``.
+    Flask itself supports Python >=3.9 as of October 2024, and this will update
+    over time.
+
+.. _PyPI: https://pypi.org/search/?c=Framework+%3A%3A+Flask
+.. _Discord Chat: https://discord.gg/pallets
+.. _GitHub Discussions: https://github.com/pallets/flask/discussions
+.. _Official Pallets Themes: https://pypi.org/project/Pallets-Sphinx-Themes/
+.. _Pallets-Eco: https://github.com/pallets-eco
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: src/flask/sansio/app.py
+Def: App.logger
+```
+    def logger(self) -> logging.Logger:
+        """A standard Python :class:`~logging.Logger` for the app, with
+        the same name as :attr:`name`.
+
+        In debug mode, the logger's :attr:`~logging.Logger.level` will
+        be set to :data:`~logging.DEBUG`.
+
+        If there are no handlers configured, a default handler will be
+        added. See :doc:`/logging` for more information.
+
+        .. versionchanged:: 1.1.0
+            The logger takes the same name as :attr:`name` rather than
+            hard-coding ``"flask.app"``.
+
+        .. versionchanged:: 1.0.0
+            Behavior was simplified. The logger is always named
+            ``"flask.app"``. The level is only set during configuration,
+            it doesn't check ``app.debug`` each time. Only one format is
+            used, not different ones depending on ``app.debug``. No
+            handlers are removed, and a handler is only added if no
+            handlers are already configured.
+
+        .. versionadded:: 0.3
+        """
+        return create_logger(self)
+```
+
+
+CODE 2 - File: src/flask/cli.py
+Def: FlaskGroup
+```
+class FlaskGroup(AppGroup):
+    """Special subclass of the :class:`AppGroup` group that supports
+    loading more commands from the configured Flask app.  Normally a
+    developer does not have to interface with this class but there are
+    some very advanced use cases for which it makes sense to create an
+    instance of this. see :ref:`custom-scripts`.
+
+    :param add_default_commands: if this is True then the default run and
+        shell commands will be added.
+    :param add_version_option: adds the ``--version`` option.
+    :param create_app: an optional callback that is passed the script info and
+        returns the loaded app.
+    :param load_dotenv: Load the nearest :file:`.env` and :file:`.flaskenv`
+        files to set environment variables. Will also change the working
+        directory to the directory containing the first file found.
+    :param set_debug_flag: Set the app's debug flag.
+
+    .. versionchanged:: 3.1
+        ``-e path`` takes precedence over default ``.env`` and ``.flaskenv`` files.
+
+    .. versionchanged:: 2.2
+        Added the ``-A/--app``, ``--debug/--no-debug``, ``-e/--env-file`` options.
+
+    .. versionchanged:: 2.2
+        An app context is pushed when running ``app.cli`` commands, so
+        ``@with_appcontext`` is no longer required for those commands.
+
+    .. versionchanged:: 1.0
+        If installed, python-dotenv will be used to load environment variables
+        from :file:`.env` and :file:`.flaskenv` files.
+    """
+
+    def __init__(
+ ... [truncated]
+```
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================
+
+
+====== Prompt Sent to LLM for Question: "What coding standards or conventions are followed?" ======
+
+System Prompt:
+You are a technical analyst providing detailed information about the repository pallets_flask by pallets.
+            
+            For this specific question: "What coding standards or conventions are followed?"
+            
+            Your task is to provide a comprehensive, accurate answer based ONLY on the context provided.
+            
+                General guidelines:
+                - Base your answer ONLY on the provided context
+                - If the context doesn't contain enough information, say so clearly
+                - Cite specific file names when relevant
+                - Organize your answer in a clear, structured format
+                - Be specific and comprehensive
+                - Focus on factual information from the repository
+            
+                If relevant, include short code snippets in markdown-style code blocks (```), and ensure the syntax is consistent with the detected language.
+                Choose snippets that help clarify your explanation, such as showing key decorators, class definitions, or test cases.
+------------------------------------------------------------
+User Prompt:
+Question: What coding standards or conventions are followed?
+            
+            Here is the relevant information from the repository:
+            
+            
+## DOCUMENTATION CONTEXT
+
+DOC 1 - File: CHANGES.rst
+    ``app.json`` provider. ``JSON_AS_ASCII``, ``JSON_SORT_KEYS``,
+    ``JSONIFY_MIMETYPE``, and ``JSONIFY_PRETTYPRINT_REGULAR`` are
+    deprecated. :pr:`4692`
+-   Setting custom ``json_encoder`` and ``json_decoder`` classes on the
+    app or a blueprint, and the corresponding ``json.JSONEncoder`` and
+    ``JSONDecoder`` classes, are deprecated. JSON behavior can now be
+    overridden using the ``app.json`` provider interface. :pr:`4692`
+-   ``json.htmlsafe_dumps`` and ``json.htmlsafe_dump`` are deprecated,
+    the function is built-in to Jinja now. :pr:`4692`
+-   Refactor ``register_error_handler`` to consolidate error checking.
+    Rewrite some error messages to be more consistent. :issue:`4559`
+-   Use Blueprint decorators and functions intended for setup after
+    registering the blueprint will show a warning. In the next version,
+    this will become an error just like the application setup methods.
+    :issue:`4571`
+-   ``before_first_request`` is deprecated. Run setup code when c... [truncated]
+
+
+DOC 2 - File: CHANGES.rst
+
+-   Fixed a error reporting bug with ``Config.from_envvar``.
+-   Removed some unused code.
+-   Release does no longer include development leftover files (.git
+    folder for themes, built documentation in zip and pdf file and some
+    .pyc files)
+
+
+Version 0.3
+-----------
+
+Released 2010-05-28, codename Schnaps
+
+-   Added support for categories for flashed messages.
+-   The application now configures a ``logging.Handler`` and will log
+    request handling exceptions to that logger when not in debug mode.
+    This makes it possible to receive mails on server errors for
+    example.
+-   Added support for context binding that does not require the use of
+    the with statement for playing in the console.
+-   The request context is now available within the with statement
+    making it possible to further push the request context or pop it.
+-   Added support for configurations.
+
+
+Version 0.2
+-----------
+
+Released 2010-05-12, codename J?germeister
+
+-   Various bugfixes
+-   Integrated JSON sup... [truncated]
+
+
+## CODE IMPLEMENTATION CONTEXT
+
+CODE 1 - File: tests/test_json.py
+Def: _has_encoding
+```
+def _has_encoding(name):
+    try:
+        import codecs
+
+        codecs.lookup(name)
+        return True
+    except LookupError:
+        return False
+```
+
+
+CODE 2 - File: src/flask/debughelpers.py
+Def: UnexpectedUnicodeError
+```
+class UnexpectedUnicodeError(AssertionError, UnicodeError):
+    """Raised in places where we want some better error reporting for
+    unexpected unicode or binary data.
+    """
+```
+
+
+## CONFIGURATION CONTEXT
+
+CONFIG 1 - File: .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
+    hooks:
+      - id: ruff
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+
+            
+            Answer the question based on this information. Be specific and reference relevant files or code when appropriate.
+================================================================================

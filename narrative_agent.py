@@ -2,11 +2,12 @@ from openai import OpenAI
 import json
 
 class NarrativeAgent:
-    def __init__(self, role: str, repo_name: str, qa_pairs: list, model="gpt-4"):
+    def __init__(self, role, repo_name, qa_pairs,  model="gpt-4o", syntax_errors=None):
         self.role = role
         self.repo_name = repo_name
         self.qa_pairs = qa_pairs
         self.model = model
+        self.syntax_errors = syntax_errors
 
     def _compose_paragraph(self, question, answer):
         prompt = (
@@ -46,6 +47,7 @@ class NarrativeAgent:
             qa_block += f"{i}. Q: {ans['question']}\nA: {ans['answer']}\n\n"
 
         # Role-specific snippet toggle
+
         if role.lower() in ["ceo", "sales", "sales_manager", "marketing"]:
             snippet_instruction = (
                 "Do not include any code snippets. Focus on conceptual, strategic, and architectural explanations. "
@@ -71,22 +73,40 @@ class NarrativeAgent:
             f"2. Maintain a professional, confident, book-like tone.\n"
             f"3. Do not use first-person language like 'I', 'we', or 'our'.\n"
             f"4. Avoid phrases like 'based on the context' or 'retrieved content'.\n"
-            f"5.If any answer includes a code snippet (in triple backticks), embed that code block exactly as-is in the report. You must include at least one code block for each major function, type, or structural element discussed. Do not omit them. \n"
+            f"5. If any answer includes a code snippet (in triple backticks), embed that code block exactly as-is in the report. You must include at least one code block for each major function, type, or structural element discussed. Do not omit them. \n"
             f"6. Only use triple backticks for code. Do not use markdown formatting (###, **bold**, lists) in regular text.\n"
             f"7. If information is missing, say: 'Not found in retrieved content.'\n"
-            f"8. Avoid exaggeration or features like AI, ML, blockchain, etc., unless explicitly mentioned."
+            f"8. Avoid exaggeration or features like AI, ML, blockchain, etc., unless explicitly mentioned.\n"
+            f"9. {snippet_instruction}"
         )
+
+        # Add syntax error information to the prompt if available
+        if hasattr(self, 'syntax_errors') and self.syntax_errors and self.syntax_errors.get('has_syntax_errors', False):
+            prompt += (
+                f"\n10. Include a 'Code Quality' section in your report that addresses the following syntax errors found in the codebase:\n"
+                f"{self.syntax_errors['summary']}\n"
+            )
+
+            # Add detailed error information if appropriate for the role
+            if role.lower() == "programmer":
+                prompt += "\nDetailed syntax errors:\n"
+                for error in self.syntax_errors['errors']:
+                    file_path = error['file_path']
+                    line_info = f" at line {error['line_number']}" if error.get('line_number') else ""
+                    prompt += f"- {file_path}{line_info}: {error['error_msg']}\n"
+
+            prompt += "\nAnalyze what these syntax errors might indicate about code quality and development practices."
+
         if role.lower() in ["ceo", "sales", "sales_manager", "marketing"]:
             prompt += (
-                "\n7. Begin the report with a clearly marked section titled **Executive Summary**. "
-                "Write 3–5 sentences summarizing the project's strategic importance, key strengths, and overall purpose. "
-                "After this section, continue the full narrative without repeating the summary."
+                f"\n11. Begin the report with a clearly marked section titled **Executive Summary**. "
+                f"Write 3–5 sentences summarizing the project's strategic importance, key strengths, and overall purpose. "
+                f"After this section, continue the full narrative without repeating the summary."
             )
-        with open("debug_phase2_prompt.txt", "w", encoding="utf-8") as f:
-            f.write(prompt)
+
+
         print("================DEBUG: Number of answers passed to Phase 2:", len(answers))
-        with open("debug_phase2_answers_raw.txt", "w", encoding="utf-8") as f:
-            json.dump(answers, f, indent=2)
+
         client = OpenAI()
         response = client.chat.completions.create(
             model="gpt-4o",

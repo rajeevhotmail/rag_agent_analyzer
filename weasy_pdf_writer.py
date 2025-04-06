@@ -191,7 +191,7 @@ class WeasyPDFWriter:
                 padding: 8px;
                 font-size: 10pt;
                 vertical-align: top;
-                word-break: break-word;
+                word-break: break-all;
             }
         """)
 
