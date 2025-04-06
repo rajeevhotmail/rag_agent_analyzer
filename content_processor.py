@@ -670,9 +670,7 @@ class ContentProcessor:
             return []  # Return empty list on failure
 
     def _process_java_code(self, file_path: str, content: str) -> List[ContentChunk]:
-        """
-        Process Java file using Tree-sitter to extract classes and methods.
-        """
+        """Process Java file using Tree-sitter to extract classes and methods."""
         chunks = []
         try:
             tree = JAVA_PARSER.parse(bytes(content, "utf8"))
@@ -680,31 +678,87 @@ class ContentProcessor:
 
             # Check if tree-sitter encountered errors during parsing
             if root.has_error:
-                # Track the error but continue processing
-                self.error_tracker.add_error(
-                    file_path=file_path,
-                    language=LANG_JAVA,
-                    error_msg="Java syntax error detected by tree-sitter"
-                )
-                self.logger.warning(f"Syntax error in Java file {file_path}")
+                # Find all error nodes
+                error_nodes = []
 
-            def get_node_text(node):
-                return content[node.start_byte:node.end_byte]
+                def find_error_nodes(node):
+                    if node.has_error or node.is_missing or node.type == "ERROR":
+                        error_nodes.append(node)
+                    for child in node.children:
+                        find_error_nodes(child)
 
-            def get_line_range(node):
-                return node.start_point[0] + 1, node.end_point[0] + 1
+                find_error_nodes(root)
 
-            def find_classes_and_methods(node):
-                for child in node.children:
-                    if child.type == "class_declaration":
-                        class_chunks = self._process_class_node(child, file_path, content)
-                        chunks.extend(class_chunks)
-                    else:
-                        find_classes_and_methods(child)
+                for error_node in error_nodes:
+                    # Get line and column info
+                    line_num = error_node.start_point[0] + 1
+                    col_num = error_node.start_point[1] + 1
 
-            find_classes_and_methods(root)
-            return chunks
+                    # Get context (3 lines before and after)
+                    lines = content.splitlines()
+                    start_line = max(0, line_num - 4)
+                    end_line = min(len(lines), line_num + 3)
+                    context_lines = lines[start_line:end_line]
+                    context = "\n".join(context_lines)
 
+                    # Determine error type
+                    error_type = "Unknown"
+                    if error_node.type == "ERROR":
+                        error_type = "Syntax Error"
+                    elif error_node.is_missing:
+                        error_type = "Missing Element"
+
+                    # Determine containing element
+                    containing_element = "Unknown"
+                    parent = error_node.parent
+                    while parent and parent != root:
+                        if parent.type in ["class_declaration", "method_declaration", "field_declaration"]:
+                            containing_element = parent.type
+                            break
+                        parent = parent.parent
+
+                    # Add detailed error
+                    self.error_tracker.add_error(
+                        file_path=file_path,
+                        language=LANG_JAVA,
+                        error_msg=f"{error_type} in {containing_element}",
+                        line_number=line_num,
+                        function_name=containing_element,
+                        metadata={
+                            "column": col_num,
+                            "context": context,
+                            "error_node_type": error_node.type,
+                            "containing_element": containing_element
+                        }
+                    )
+
+                    self.logger.warning(f"Syntax error in Java file {file_path} at line {line_num}, column {col_num}")
+
+                # If no specific error nodes found, add a generic error
+                if not error_nodes:
+                    self.error_tracker.add_error(
+                        file_path=file_path,
+                        language=LANG_JAVA,
+                        error_msg="Java syntax error detected by tree-sitter"
+                    )
+                    self.logger.warning(f"Syntax error in Java file {file_path}")
+                    
+                def get_node_text(node):
+                    return content[node.start_byte:node.end_byte]
+
+                def get_line_range(node):
+                    return node.start_point[0] + 1, node.end_point[0] + 1
+
+                def find_classes_and_methods(node):
+                    for child in node.children:
+                        if child.type == "class_declaration":
+                            class_chunks = self._process_class_node(child, file_path, content)
+                            chunks.extend(class_chunks)
+                        else:
+                            find_classes_and_methods(child)
+
+                find_classes_and_methods(root)
+                return chunks
         except Exception as e:
             self.logger.error(f"Error processing Java file {file_path}: {e}", exc_info=True)
             self.error_tracker.add_error(

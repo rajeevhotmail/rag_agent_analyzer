@@ -24,6 +24,9 @@ class WeasyPDFWriter:
         filename = f"{repo_name}_{role}_report_{int(time.time())}.pdf"
         output_path = os.path.join(self.output_dir, filename)
 
+        print("====== DEBUG HTML INPUT START ======")
+        print(text)
+        print("====== DEBUG HTML INPUT END ======")
         # Convert content into HTML
         html_content = self._build_html(text, repo_name, role, key_findings, competitive_section)
         print("======= HTML Content Length =======")
@@ -69,11 +72,26 @@ class WeasyPDFWriter:
                     is_collecting_summary = False
                     continue
                 summary_html += f"<p>{stripped}</p>"
+            elif stripped.lstrip().startswith("### "):
+                body_html_parts.append(f"<h3>{stripped.lstrip()[4:].strip()}</h3>")
+            elif stripped.lstrip().startswith("## "):
+                section_title = stripped.lstrip()[3:].strip()
+                body_html_parts.append(f"<h2>{section_title}</h2>")
+            elif stripped.lstrip().startswith("# "):
+                section_title = stripped.lstrip()[2:].strip()
+                body_html_parts.append(f"<h2>{section_title}</h2>")
+            elif re.match(r"^\*\*(.+?)\*\*$", stripped):
+                bold_heading = re.match(r"^\*\*(.+?)\*\*$", stripped).group(1).strip()
+                body_html_parts.append(f"<h2>{bold_heading}</h2>")
             elif stripped:
-                body_html_parts.append(f"<p>{stripped}</p>")
+                from narrative_agent import strip_markdown
+                clean = strip_markdown(stripped)
+                clean = re.sub(r"^#+\s*", "", clean)  # sanitize any stray #
+                body_html_parts.append(f"<p>{clean}</p>")
 
-        section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
-        chunk_size = max(1, len(body_html_parts) // len(section_headers))
+
+        #section_headers = ROLE_SECTION_HEADERS.get(role.lower(), ["Narrative"])
+        #chunk_size = max(1, len(body_html_parts) // len(section_headers))
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         html = f"""
@@ -94,24 +112,41 @@ class WeasyPDFWriter:
             html += summary_html
 
         # ✅ Table of Contents (dynamic)
-        html += "<h2>Table of Contents</h2><ul>"
-        toc_entries = []
+
+
+        # ✅ Build sections dynamically based on <h2> tags in body_html_parts
         rendered_sections = []
+        toc_entries = []
+        current_section_id = None
+        current_section_title = None
+        current_paras = []
 
-        for i, header in enumerate(section_headers):
-            section_id = f"section{i+1}"
-            paras = body_html_parts[i * chunk_size: (i + 1) * chunk_size]
-            has_real_content = any(p.strip("<p>").strip("</p>").strip() for p in paras if not p.startswith("<pre>"))
+        for part in body_html_parts:
+            if part.startswith("<h2>") and part.endswith("</h2>"):
+                # Save previous section
+                if current_section_id and current_paras:
+                    rendered_sections.append((current_section_id, current_section_title, current_paras))
 
-            if has_real_content or any(p.startswith("<pre>") for p in paras):  # also check for code blocks
-                toc_entries.append((section_id, header))
-                rendered_sections.append((section_id, header, paras))
+                # Start new section
+                current_section_title = re.sub(r"<\/?h2>", "", part).strip()
+                current_section_id = f"section_{len(toc_entries) + 1}"
+                toc_entries.append((current_section_id, current_section_title))
+                current_paras = []
+            else:
+                current_paras.append(part)
 
+        # Final section
+        if current_section_id and current_paras:
+            rendered_sections.append((current_section_id, current_section_title, current_paras))
+
+        # ✅ TOC rendering (same as before)
+        html += "<h2>Table of Contents</h2><ul>"
         for section_id, header in toc_entries:
             html += f'<li><a href="#{section_id}">{header}</a></li>'
         if competitive_section:
             html += '<li><a href="#competitive">Competitive Landscape</a></li>'
         html += "</ul>"
+
 
         # ✅ Key Findings
         if key_findings:

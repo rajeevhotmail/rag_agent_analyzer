@@ -1,6 +1,12 @@
 from openai import OpenAI
 import json
+import re
 
+def strip_markdown(text):
+    # Remove bold and italic markdown (**bold**, *italic*)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.*?)\*", r"\1", text)
+    return text
 class NarrativeAgent:
     def __init__(self, role, repo_name, qa_pairs,  model="gpt-4o", syntax_errors=None):
         self.role = role
@@ -44,7 +50,9 @@ class NarrativeAgent:
         # Prepare Q&A block
         qa_block = ""
         for i, ans in enumerate(answers, 1):
-            qa_block += f"{i}. Q: {ans['question']}\nA: {ans['answer']}\n\n"
+            question = strip_markdown(ans['question'])
+            answer = strip_markdown(ans['answer'])
+            qa_block += f"{i}. Q: {question}\nA: {answer}\n\n"
 
         # Role-specific snippet toggle
 
@@ -93,13 +101,19 @@ class NarrativeAgent:
                 for error in self.syntax_errors['errors']:
                     file_path = error['file_path']
                     line_info = f" at line {error['line_number']}" if error.get('line_number') else ""
-                    prompt += f"- {file_path}{line_info}: {error['error_msg']}\n"
+                    col_info = f", column {error['metadata'].get('column')}" if error.get('metadata', {}).get('column') else ""
+                    element_info = f" in {error['function_name']}" if error.get('function_name') else ""
+                    prompt += f"- {file_path}{line_info}{col_info}{element_info}: {error['error_msg']}\n"
+
+                    # Add code context if available
+                    if error.get('metadata', {}).get('context'):
+                        prompt += "```code\n" + error['metadata']['context'] + "\n```\n"
 
             prompt += "\nAnalyze what these syntax errors might indicate about code quality and development practices."
 
         if role.lower() in ["ceo", "sales", "sales_manager", "marketing"]:
             prompt += (
-                f"\n11. Begin the report with a clearly marked section titled **Executive Summary**. "
+                f"11. Begin the report with a clearly marked section titled Executive Summary (as a standalone heading, not bold or stylized). "
                 f"Write 3–5 sentences summarizing the project's strategic importance, key strengths, and overall purpose. "
                 f"After this section, continue the full narrative without repeating the summary."
             )
