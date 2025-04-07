@@ -63,14 +63,15 @@ class NarrativeAgent:
             )
         else:
             snippet_instruction = (
-                "If the answers mention specific functions, test methods, or class structures, "
-                "embed at least one short code snippet (3–8 lines) using markdown-style triple backticks (```). "
-                "Use code blocks only for actual code — not for formatting text."
+                "If any answer references a specific class, method, or test function, "
+            "you must embed a short illustrative code snippet using triple backticks (```), even if one was not included in the original answer. "
+            "The snippet should reflect what the code might look like based on standard Python or Java conventions. "
+            "Use triple backticks **only** for actual code blocks — not for formatting normal text."
             )
 
         # Prompt to GPT
         prompt = (
-            f"You are a senior technical writer generating a formal report about a software project. "
+            "You are a senior technical writer specializing in software engineering documentation. Your job is to write clear, polished reports about software projects for technical and non-technical audiences. Do not break character. Do not mention prompts, retrieved content, the model, or AI systems. Always write as if you are a human crafting a formal software project report.\n\n"
             f"This report is for the role: {role}.\n\n"
             f"The following are answers derived from actual source code and documentation. "
             f"Some answers already include Python code snippets inside triple backticks. "
@@ -83,15 +84,18 @@ class NarrativeAgent:
             f"4. Avoid phrases like 'based on the context' or 'retrieved content'.\n"
             f"5. If any answer includes a code snippet (in triple backticks), embed that code block exactly as-is in the report. You must include at least one code block for each major function, type, or structural element discussed. Do not omit them. \n"
             f"6. Only use triple backticks for code. Do not use markdown formatting (###, **bold**, lists) in regular text.\n"
-            f"7. If information is missing, say: 'Not found in retrieved content.'\n"
+            f"7. If information is missing, use phrasing like: Details regarding version control are not clearly documented in the available files.\n"
             f"8. Avoid exaggeration or features like AI, ML, blockchain, etc., unless explicitly mentioned.\n"
-            f"9. {snippet_instruction}"
+            f"9. Break the report into logical sections using section titles like 'Programming Languages', 'Architecture', 'Testing', etc. "
+            f"Begin each section with a heading using markdown format like ## Heading Name. Do not use bold (**Heading**) as a replacement."
+            f"10. {snippet_instruction}"
+
         )
 
         # Add syntax error information to the prompt if available
         if hasattr(self, 'syntax_errors') and self.syntax_errors and self.syntax_errors.get('has_syntax_errors', False):
             prompt += (
-                f"\n10. Include a 'Code Quality' section in your report that addresses the following syntax errors found in the codebase:\n"
+                f"\n11. Include a 'Code Quality' section in your report that addresses the following syntax errors found in the codebase:\n"
                 f"{self.syntax_errors['summary']}\n"
             )
 
